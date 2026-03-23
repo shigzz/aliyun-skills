@@ -1,0 +1,6 @@
+alibabacloud_domain20180129>=1.0.0
+alibabacloud_credentials>=0.3.0
+alibabacloud_tea_openapi>=0.3.0
+alibabacloud_tea_util>=0.3.0
+python-dotenv>=1.0.0
+
