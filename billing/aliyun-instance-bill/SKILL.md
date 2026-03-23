@@ -1,5 +1,5 @@
 ---
-name: aliyun-describe-instance-bill
+name: aliyun-instance-bill
 description: 查询阿里云实例级账单（DescribeInstanceBill）。适用于"查询实例账单""查看账单详情""了解消费情况"等场景。
 ---
 
