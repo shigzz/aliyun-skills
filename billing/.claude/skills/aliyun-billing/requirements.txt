@@ -1,5 +1,0 @@
-alibabacloud_bssopenapi20171214>=1.0.0
-alibabacloud_credentials>=1.0.0
-alibabacloud_tea_openapi>=1.0.0
-alibabacloud_tea_util>=1.0.0
-python-dotenv>=1.0.0
