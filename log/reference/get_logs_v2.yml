@@ -1,0 +1,466 @@
+GetLogsV2: {
+summary: "查询指定Project下某个Logstore中的原始日志数据，返回结果显示某时间区间中的原始日志（返回结果压缩后传输）。",
+path: "/logstores/{logstore}/logs",
+methods: [
+"post"
+],
+schemes: [
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+consumes: [
+"application/json"
+],
+produces: [
+"application/json"
+],
+operationType: "read",
+deprecated: false,
+systemTags: {
+operationType: "get",
+riskType: "none",
+chargeType: "free",
+abilityTreeCode: "179698",
+abilityTreeNodes: [
+"FEATUREslsCAO32E"
+]
+},
+parameters: [
+{
+name: "project",
+in: "host",
+schema: {
+title: "project 名称。",
+description: "project 名称。",
+type: "string",
+required: true,
+example: "ali-test-project"
+}
+},
+{
+name: "logstore",
+in: "path",
+schema: {
+title: "logstore 名称。",
+description: "logstore 名称。",
+type: "string",
+required: true,
+example: "test-logstore"
+}
+},
+{
+name: "Accept-Encoding",
+in: "header",
+schema: {
+title: "压缩方式",
+description: "压缩方式
+
+- Java、Python、Go目前支持lz4 、gzip 解压缩
+
+- php、Js、C#目前仅支持gzip解压缩",
+type: "string",
+required: true,
+enumValueTitles: {
+lz4: "lz4",
+gzip: "gzip"
+},
+example: "lz4",
+default: "lz4"
+}
+},
+{
+name: "body",
+in: "body",
+style: "json",
+schema: {
+description: "请求结构体。",
+type: "object",
+properties: {
+from: {
+title: "查询开始时间点。该时间是指写入日志数据时指定的日志时间。
+
+请求参数from和to定义的时间区间遵循左闭右开原则，即该时间区间包括区间开始时间点，但不包括区间结束时间点。如果from和to的值相同，则为无效区间，函数直接返回错误。
+Unix时间戳格式，表示从1970-1-1 00:00:00 UTC计算起的秒数。",
+description: "查询开始时间点。该时间是指写入日志数据时指定的日志时间。
+
+请求参数from和to定义的时间区间遵循左闭右开原则，即该时间区间包括区间开始时间点，但不包括区间结束时间点。如果from和to的值相同，则为无效区间，函数直接返回错误。
+Unix时间戳格式，表示从1970-1-1 00:00:00 UTC计算起的秒数。",
+type: "integer",
+format: "int32",
+required: true,
+example: "1627268185"
+},
+to: {
+title: "查询结束时间点。该时间是指写入日志数据时指定的日志时间。
+
+请求参数from和to定义的时间区间遵循左闭右开原则，即该时间区间包括区间开始时间点，但不包括区间结束时间点。如果from和to的值相同，则为无效区间，函数直接返回错误。
+Unix时间戳格式，表示从1970-1-1 00:00:00 UTC计算起的秒数。",
+description: "查询结束时间点。该时间是指写入日志数据时指定的日志时间。
+
+请求参数from和to定义的时间区间遵循左闭右开原则，即该时间区间包括区间开始时间点，但不包括区间结束时间点。如果from和to的值相同，则为无效区间，函数直接返回错误。
+Unix时间戳格式，表示从1970-1-1 00:00:00 UTC计算起的秒数。",
+type: "integer",
+format: "int32",
+required: true,
+example: "1627268185"
+},
+line: {
+title: "仅当query参数为查询语句时，该参数有效，表示请求返回的最大日志条数。最小值为0，最大值为100，默认值为100。",
+description: "请求返回的最大日志条数。仅当query参数为查询语句（非 SQL 分析语句）时，该参数有效。最小值为0，最大值为100，默认值为100。",
+type: "integer",
+format: "int64",
+required: false,
+maximum: "100",
+minimum: "0",
+example: "100",
+default: "100"
+},
+offset: {
+title: "仅当query参数为查询语句时，该参数有效，表示查询开始行。默认值为0。",
+description: "查询开始行。仅当query参数为查询语句（非 SQL 分析语句）时，该参数有效。值从 0 开始，默认值为 0。",
+type: "integer",
+format: "int64",
+required: false,
+example: "0",
+default: "0"
+},
+reverse: {
+title: "用于指定返回结果是否按日志时间戳降序返回日志，精确到分钟级别。
+
+true：按照日志时间戳降序返回日志。
+false（默认值）：按照日志时间戳升序返回日志。
+注意
+当query参数为查询语句时，参数reverse有效，用于指定返回日志排序方式。
+当query参数为查询和分析语句时，参数reverse无效，由SQL分析语句中order by语法指定排序方式。如果order by为asc（默认），则为升序；如果order by为desc，则为降序。",
+description: "用于指定返回结果是否按日志时间戳降序返回日志，精确到分钟级别。仅当 query 为查询语句（非 SQL 分析语句）时有效。
+
+- true：按照日志时间戳降序返回日志。
+- false（默认值）：按照日志时间戳升序返回日志。
+
+如需在SQL分析语句中排序，请使用 order by 语法指定排序方式。如果 order by为asc（默认），则为升序；如果order by为desc，则为降序。",
+type: "boolean",
+required: false,
+example: "false",
+default: "false"
+},
+powerSql: {
+title: "是否开启增强sql，默认关闭。",
+description: "是否开启独享版 SQL，默认关闭。",
+type: "boolean",
+required: false,
+example: "false",
+default: "false"
+},
+session: {
+description: "查询参数",
+type: "string",
+required: false,
+example: "mode=scan"
+},
+topic: {
+description: "日志主题。默认值为空。",
+type: "string",
+required: false,
+example: """"
+},
+query: {
+title: "查询语句或者分析语句。更多信息，请参见查询概述和分析概述。
+
+在query参数的分析语句中加上set session parallel_sql=true;，表示使用SQL独享版。例如* | set session parallel_sql=true; select count(*) as pv 。
+
+说明 当query参数中有分析语句（SQL语句）时，该接口的line参数和offset参数无效，建议设置为0，需通过SQL语句的LIMIT语法实现翻页。更多信息，请参见分页显示查询分析结果。",
+description: "查询语句或者分析语句。更多信息，请参见[查询概述](~~43772~~)和[分析概述](~~53608~~)。
+
+在query参数的分析语句中加上set session parallel_sql=true;，表示使用SQL独享版。例如* | set session parallel_sql=true; select count(*) as pv 。
+
+说明当query参数中有分析语句（SQL语句）时，该接口的line参数和offset参数无效，建议设置为0，需通过SQL语句的LIMIT语法实现翻页。更多信息，请参见分页显示查询分析结果。",
+type: "string",
+required: false,
+example: "status: 401 | SELECT remote_addr,COUNT(*) as pv GROUP by remote_addr ORDER by pv desc limit 5"
+},
+forward: {
+description: "scan或短语查询表示是否向前或向后翻页",
+type: "boolean",
+required: false,
+example: "false",
+default: "false"
+},
+highlight: {
+description: "是否高亮",
+type: "boolean",
+required: false,
+example: "false",
+default: "false"
+},
+isAccurate: {
+description: "是否开启纳秒级有序",
+type: "boolean",
+required: false,
+example: "true"
+}
+},
+required: false
+}
+}
+],
+responses: {
+200: {
+headers: {
+date: {
+schema: {
+title: "返回响应的时间。",
+type: "string"
+}
+},
+server: {
+schema: {
+title: "服务器名称。",
+type: "string"
+}
+},
+content-length: {
+schema: {
+title: "响应内容长度。",
+type: "string"
+}
+},
+x-log-requestid: {
+schema: {
+title: "服务端产生的标识，该请求的唯一ID。",
+type: "string"
+}
+},
+x-log-bodyrawsize: {
+schema: {
+title: "返回响应内容的大小。",
+type: "string"
+}
+},
+connection: {
+schema: {
+title: "是否长链接。取值包括：  close：不是长链接，则每个HTTP请求都会重新建立TCP连接。 keep-alive：长链接，TCP连接建立后保持连接状态，节省连接所需时间和带宽。",
+type: "string"
+}
+},
+content-type: {
+schema: {
+title: "返回的响应体的内容格式。",
+type: "string"
+}
+},
+x-log-compresstype: {
+schema: {
+title: "返回响应内容的压缩格式。",
+type: "string"
+}
+}
+},
+schema: {
+description: "返回数据",
+type: "object",
+properties: {
+meta: {
+description: "返回数据meta信息",
+type: "object",
+properties: {
+progress: {
+description: "查询的结果是否完整。
+
+- Complete：查询已经完成，返回结果为完整结果。
+- Incomplete：查询已经完成，返回结果为不完整结果，需要重复请求以获得完整结果。",
+type: "string",
+example: "Complete"
+},
+aggQuery: {
+description: "查询语句中 | 之后的SQL部分",
+type: "string",
+example: "select *"
+},
+whereQuery: {
+description: "查询语句中 | 之前的部分",
+type: "string",
+example: "*"
+},
+hasSQL: {
+description: "是否sql查询",
+type: "boolean",
+example: "false"
+},
+processedRows: {
+description: "本次查询处理的行数。",
+type: "integer",
+format: "int64",
+example: "10000"
+},
+elapsedMillisecond: {
+description: "本次查询消耗的毫秒时间。",
+type: "integer",
+format: "int64",
+example: "5"
+},
+cpuSec: {
+description: "独享SQL的核时",
+type: "number",
+format: "double",
+example: "0.002"
+},
+cpuCores: {
+description: "使用cpu核数",
+type: "integer",
+format: "int32",
+example: "3"
+},
+keys: {
+description: "查询结果中所有的key",
+type: "array",
+items: {
+description: "key",
+type: "string",
+example: "key"
+}
+},
+terms: {
+description: "查询语句中所有的词",
+type: "array",
+items: {
+description: "词",
+type: "object",
+example: "{term=*, key=}"
+}
+},
+limited: {
+description: "限制条数，sql不带limit会返回",
+type: "integer",
+format: "int32",
+example: "100"
+},
+mode: {
+description: "查询模式枚举
+0: 普通查询（包括sql）
+1: 短语查询
+2: SCAN扫描
+3: SCAN SQL",
+type: "integer",
+format: "int32",
+example: "0"
+},
+phraseQueryInfo: {
+description: "短语查询",
+type: "object",
+properties: {
+scanAll: {
+description: "是否已经扫描了全部日志",
+type: "boolean",
+example: "true"
+},
+beginOffset: {
+description: "本次扫描结果对应的索引过滤后的起始offset",
+type: "integer",
+format: "int64",
+example: "0"
+},
+endOffset: {
+description: "本次扫描结果对应的索引过滤后的结束offset",
+type: "integer",
+format: "int64",
+example: "0"
+},
+endTime: {
+description: "本次扫描结果对应的索引过滤后的最后时间",
+type: "integer",
+format: "int64",
+example: "1"
+}
+}
+},
+scanBytes: {
+description: "scan时返回扫描的数据量（字节）。",
+type: "integer",
+format: "int64",
+example: "1024"
+},
+highlights: {
+description: "高亮内容",
+type: "array",
+items: {
+description: "高亮内容",
+type: "array",
+items: {
+description: "高亮日志内容",
+$ref: "#/components/schemas/LogContent"
+}
+}
+},
+count: {
+description: "本次查询请求返回的日志行数。",
+type: "integer",
+format: "int32",
+example: "1"
+},
+processedBytes: {
+description: "查询处理日志量",
+type: "integer",
+format: "int64",
+example: "10000"
+},
+isAccurate: {
+description: "是否开启纳秒级有序",
+type: "boolean",
+example: "true"
+},
+columnTypes: {
+description: "列类型",
+type: "array",
+items: {
+description: "类型",
+type: "string",
+example: "long"
+}
+},
+telementryType: {
+description: "可观测数据类型",
+type: "string",
+example: "None"
+}
+}
+},
+data: {
+description: "返回结果。",
+type: "array",
+items: {
+description: "返回的数据。",
+type: "object",
+additionalProperties: {
+type: "string",
+example: "{'remote_addr': '198.51.XXX.XXX', 'pv': '1', '__source__': '', '__time__': '1649902984'}",
+description: "返回数据。"
+}
+}
+}
+}
+}
+}
+},
+staticInfo: {
+returnType: "synchronous"
+},
+responseDemo: "[{"type":"json","example":"{\n  \"meta\": {\n    \"progress\": \"Complete\",\n    \"aggQuery\": \"select *\",\n    \"whereQuery\": \"*\",\n    \"hasSQL\": false,\n    \"processedRows\": 10000,\n    \"elapsedMillisecond\": 5,\n    \"cpuSec\": 0.002,\n    \"cpuCores\": 3,\n    \"keys\": [\n      \"key\"\n    ],\n    \"terms\": [\n      {\n        \"test\": \"test\",\n        \"test2\": 1\n      }\n    ],\n    \"limited\": 100,\n    \"mode\": 0,\n    \"phraseQueryInfo\": {\n      \"scanAll\": true,\n      \"beginOffset\": 0,\n      \"endOffset\": 0,\n      \"endTime\": 1\n    },\n    \"scanBytes\": 1024,\n    \"highlights\": [\n      [\n        {\n          \"Key\": \"key-test\",\n          \"Value\": \"value-test\"\n        }\n      ]\n    ],\n    \"count\": 1,\n    \"processedBytes\": 10000,\n    \"isAccurate\": true,\n    \"columnTypes\": [\n      \"long\"\n    ],\n    \"telementryType\": \"None\"\n  },\n  \"data\": [\n    {\n      \"key\": \"{'remote_addr': '198.51.XXX.XXX', 'pv': '1', '__source__': '', '__time__': '1649902984'}\"\n    }\n  ]\n}","errorExample":""},{"type":"xml","example":"","errorExample":""}]",
+title: "查询Logstore中的日志数据",
+description: "- 使用过程中注意指定压缩方法，不同语言实现的压缩算法不同，详情参考入参Accept-Encoding。
+
+- 更多相关说明请参见[GetLogs](~~2771313~~)。
+### 鉴权资源
+下表列出了API对应的授权信息。您可以在RAM权限策略语句的Action元素中添加该信息，用于为RAM用户或RAM角色授予调用此API的权限。
+|动作（Action）  | 授权策略中的资源描述方式（Resource）  |
+| :------------ | :------------ |
+| `log:GetLogStoreLogs`  | `acs:log:{#regionId}:{#accountId}:project/{#ProjectName}/logstore/{#LogstoreName}`  |",
+changeSet: [ ],
+flowControl: {
+flowControlList: [ ]
+},
+ramActions: [ ]
+}

@@ -1,0 +1,225 @@
+ListLogStores: {
+summary: "查询指定Project下所有或匹配的LogStore列表。",
+path: "/logstores",
+methods: [
+"get"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+consumes: [
+"application/json"
+],
+produces: [
+"application/json"
+],
+operationType: "read",
+deprecated: false,
+systemTags: {
+operationType: "get"
+},
+parameters: [
+{
+name: "project",
+in: "host",
+schema: {
+description: "Project名称。",
+type: "string",
+required: true,
+example: "ali-test-project"
+}
+},
+{
+name: "offset",
+in: "query",
+schema: {
+description: "查询开始行。默认值为0。",
+type: "integer",
+format: "int32",
+required: false,
+example: "0",
+default: "0"
+}
+},
+{
+name: "size",
+in: "query",
+schema: {
+title: "默认值为 500。",
+description: "分页查询时，设置的每页行数。最大值为500。默认值为200。",
+type: "integer",
+format: "int32",
+required: false,
+example: "10",
+default: "500"
+}
+},
+{
+name: "logstoreName",
+in: "query",
+schema: {
+description: "Logstore名称。支持模糊匹配，例如输入test，则返回名称包含test的Logstore列表。",
+type: "string",
+required: false,
+example: "my-logstore"
+}
+},
+{
+name: "telemetryType",
+in: "query",
+schema: {
+description: "要查询的日志类型。取值包括：
+
+- None：查询所有日志类型。
+- Metrics：查询Metrics类型。",
+type: "string",
+required: false,
+example: "None"
+}
+},
+{
+name: "mode",
+in: "query",
+schema: {
+description: "日志服务提供标准型（Standard）和查询型（Query）两种类型的Logstore。
+  - **standard**：支持日志服务一站式数据分析功能，适用于实时监控、交互式分析以及构建完整的可观测性系统等场景。
+  - **query**：支持高性能查询，索引流量费用约为Standard的一半，但不支持SQL分析，适用于数据量大、存储周期长（周、月级别以上）、无日志分析的场景。",
+type: "string",
+required: false,
+example: "standard"
+}
+}
+],
+responses: {
+200: {
+headers: {
+Server: {
+schema: {
+title: "服务器名称。",
+type: "string",
+example: "nginx"
+}
+},
+Content-Type: {
+schema: {
+title: "返回的响应体的内容格式。",
+type: "string",
+example: "application/json"
+}
+},
+Content-Length: {
+schema: {
+title: "响应内容长度。",
+type: "string",
+example: "0"
+}
+},
+Connection: {
+schema: {
+title: "是否长链接。取值包括：  close：不是长链接，则每个HTTP请求都会重新建立TCP连接。 keep-alive：长链接，TCP连接建立后保持连接状态，节省连接所需时间和带宽。",
+type: "string",
+example: "close"
+}
+},
+Date: {
+schema: {
+title: "返回响应的时间。",
+type: "string",
+example: "Sun, 27 May 2018 08:25:04 GMT"
+}
+},
+x-log-requestid: {
+schema: {
+title: "服务端产生的标识，该请求的唯一ID。",
+type: "string",
+example: "5B0A6B60BB6EE39764D458B5"
+}
+}
+},
+schema: {
+title: "",
+description: "返回body",
+type: "object",
+properties: {
+total: {
+title: "符合查询条件的logstore总数",
+description: "符合查询条件的Logstore总数。",
+type: "integer",
+format: "int32",
+example: "2"
+},
+count: {
+title: "当前返回行数",
+description: "当前返回行数。",
+type: "integer",
+format: "int32",
+example: "2"
+},
+logstores: {
+description: "满足条件的Logstore列表。",
+type: "array",
+items: {
+description: "Logstore信息。",
+type: "string",
+example: "test-1,test-2"
+},
+example: "["test-1","test-2"]"
+}
+}
+}
+}
+},
+responseDemo: "[{"type":"json","example":"{\n  \"total\": 2,\n  \"count\": 2,\n  \"logstores\": [\n    \"test-1,test-2\"\n  ]\n}","errorExample":""},{"type":"xml","example":"","errorExample":""}]",
+title: "列出LogStore",
+description: "### 接口说明
+
+- Host由Project名称和日志服务Endpoint构成，您需要在Host中指定Project。
+- 已创建并获取AccessKey。更多信息，请参见[访问密钥](~~29009~~)。
+
+ 阿里云账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM用户进行API访问或日常运维。RAM用户需具备操作日志服务资源的权限。具体操作，请参见[创建RAM用户及授权](~~47664~~)。
+- 已明确您查询日志所属的Project名称、所属地域等。如何查询，请参见[管理Project](~~48984~~)。
+### 鉴权资源
+下表列出了API对应的授权信息。您可以在RAM权限策略语句的Action元素中添加该信息，用于为RAM用户或RAM角色授予调用此API的权限。
+|动作（Action）  | 授权策略中的资源描述方式（Resource）  |
+| :------------ | :------------ |
+| `log:ListLogStores`  | `acs:log:{#regionId}:{#accountId}:project/{#ProjectName}/logstore/*`  |",
+extraInfo: "| HttpStatusCode  | ErrorCode  | ErrorMessage  | 错误码描述  |
+| :------------ | :------------ | :------------ | :------------ |
+| 404  | ProjectNotExist  | Project does not exist.  | Project不存在。  |
+|  500 |  InternalServerError |  Specified Server Error Message. | 内部服务调用错误。 |
+
+更多信息，请参见[通用错误码](~~29013~~)。",
+changeSet: [ ],
+flowControl: {
+flowControlList: [ ]
+},
+ramActions: [
+{
+operationType: "get",
+ramAction: {
+action: "log:ListLogStores",
+authLevel: "resource",
+actionConditions: [
+{
+conditionKey: "log:TLSVersion",
+validationType: "always"
+}
+],
+resources: [
+{
+validationType: "always",
+product: "SLS",
+resourceType: "LogStore",
+arn: "acs:log:{#regionId}:{#accountId}:project/{#project}/logstore/*"
+}
+]
+}
+}
+]
+}
