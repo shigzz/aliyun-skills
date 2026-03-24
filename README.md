@@ -14,12 +14,15 @@
 │       └── reference/                # 参考代码
 │           └── describe_instance_bill.py
 ├── domain/                           # 域名相关 Skills
-│   └── aliyun-domain-list/           # 域名列表查询 Skill
-│       ├── SKILL.md                  # Skill 使用文档
-│       ├── requirements.txt          # Python 依赖
-│       ├── .env.example              # 环境变量模板
-│       └── reference/                # 参考代码
-│           └── query_domainlist.py
+│   ├── SKILL.md                      # 域名查询 Skill 文档
+│   ├── .env.example                  # 环境变量模板
+│   ├── scripts/                      # Python 脚本
+│   │   ├── query_domainlist.py       # 域名列表查询
+│   │   ├── check_domain.py           # 域名检查
+│   │   └── requirements.txt          # Python 依赖
+│   └── reference/                    # 工作流定义
+│       ├── query_domainlist.yml
+│       └── check_domain.yml
 └── log/                              # 日志服务相关 Skills
     ├── SKILL.md                      # SLS 日志查询 Skill 文档
     └── reference/                    # 参考代码
@@ -54,12 +57,13 @@
 
 ---
 
-### 2. 阿里云域名列表查询 (domain/aliyun-domain-list)
+### 2. 阿里云域名查询 (domain/)
 
-通过阿里云 Domain OpenAPI 查询当前账号下的域名列表。
+通过阿里云 Domain OpenAPI 查询当前账号下的域名列表和域名详情。
 
 **功能特性：**
 - 查询账号下所有域名
+- 查询单个域名详细信息
 - 支持按域名名称搜索
 - 支持按到期时间筛选（即将到期域名）
 - 支持按注册时间筛选
@@ -69,6 +73,7 @@
 
 **核心 API：**
 - `QueryDomainList` - 查询域名列表
+- `QueryDomainByDomainName` - 查询域名详情
 
 **使用场景：**
 - 域名资产管理
@@ -102,7 +107,15 @@
 
 ## 快速开始
 
-### 1. 配置阿里云访问凭据
+### 1. 安装
+
+使用 Claude Code 的 skills 命令安装：
+
+```bash
+npx skills add https://github.com/shigzz/aliyun-skills
+```
+
+### 2. 配置阿里云访问凭据
 
 所有 Skill 都需要配置阿里云 AccessKey。支持以下方式：
 
@@ -120,7 +133,7 @@ export ALIBABA_CLOUD_ACCESS_KEY_SECRET="your-access-key-secret"
 ```bash
 cp billing/aliyun-instance-bill/.env.example billing/aliyun-instance-bill/.env
 # 或
-cp domain/aliyun-domain-list/.env.example domain/aliyun-domain-list/.env
+cp domain/.env.example domain/.env
 ```
 
 编辑 `.env` 文件：
@@ -132,7 +145,7 @@ ALIBABA_CLOUD_ACCESS_KEY_SECRET=your_access_key_secret
 
 获取阿里云访问密钥：[阿里云文档](https://help.aliyun.com/document_detail/53045.html)
 
-### 2. 使用 Skill
+### 3. 使用 Skill
 
 #### 方式一：作为 Claude Code Skill 使用
 
@@ -156,8 +169,9 @@ python describe_instance_bill.py
 
 **域名查询：**
 ```bash
-cd domain/aliyun-domain-list/reference
+cd domain/scripts
 python query_domainlist.py
+python check_domain.py
 ```
 
 **日志查询：**
@@ -172,7 +186,7 @@ python get_logs_v2.py
 | Skill | 文档 | 说明 |
 |-------|------|------|
 | 实例账单查询 | [billing/aliyun-instance-bill/SKILL.md](billing/aliyun-instance-bill/SKILL.md) | BSS 账单 API 使用文档 |
-| 域名列表查询 | [domain/aliyun-domain-list/SKILL.md](domain/aliyun-domain-list/SKILL.md) | Domain API 使用文档 |
+| 域名查询 | [domain/SKILL.md](domain/SKILL.md) | Domain API 使用文档 |
 | SLS 日志查询 | [log/SKILL.md](log/SKILL.md) | SLS 日志服务 API 使用文档 |
 
 ## 开发指南

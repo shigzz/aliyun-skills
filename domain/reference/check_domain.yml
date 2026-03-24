@@ -1,0 +1,189 @@
+CheckDomain: {
+methods: [
+"post",
+"get"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "read",
+deprecated: false,
+systemTags: {
+operationType: "get"
+},
+parameters: [
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "域名名称。",
+type: "string",
+required: true,
+docRequired: true,
+example: "test**.xin"
+}
+},
+{
+name: "FeeCommand",
+in: "query",
+schema: {
+description: "操作命令。取值：
+- **create**：新购。
+- **renew**：续费。
+- **transfer**：转入。
+- **restore**：赎回。
+                           ",
+type: "string",
+required: false,
+example: "create"
+}
+},
+{
+name: "FeeCurrency",
+in: "query",
+schema: {
+description: "货币类型。取值： **USD**（美元）。
+
+                           ",
+type: "string",
+required: false,
+example: "USD"
+}
+},
+{
+name: "FeePeriod",
+in: "query",
+schema: {
+description: "购买周期年限，单位为**年**。范围为**1**~**10**年。",
+type: "integer",
+format: "int32",
+required: false,
+example: "1"
+}
+},
+{
+name: "Lang",
+in: "query",
+schema: {
+description: "接口返回错误信息语言。取值：
+- **zh**：中文。
+- **en**：英文。
+
+默认为**en**。",
+type: "string",
+required: false,
+example: "en",
+default: "en"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+RequestId: {
+description: "唯一请求识别码。",
+type: "string",
+example: "BA7A4FD4-EB9A-4A20-BB0C-9AEB15634DC1"
+},
+Avail: {
+description: "域名是否可以注册。取值：
+- **1**：可注册。
+- **3**：预登记。
+- **4**：可删除预订。
+- **0**：不可注册。
+- **-1**：异常。
+- **-2**：暂停注册。
+- **-3**：黑名单。
+                           ",
+type: "string",
+example: "1"
+},
+Price: {
+description: "溢价词注册价格。",
+type: "integer",
+format: "int64",
+example: "1286"
+},
+DomainName: {
+description: "查询的域名名称。",
+type: "string",
+example: "test**.xin"
+},
+Premium: {
+description: "是否是溢价词。取值：
+- **true**：是。
+- **false**：否。
+                           ",
+type: "string",
+example: "true"
+},
+DynamicCheck: {
+description: "是否动态询价。取值：
+- **true**：是。
+- **false**：否。",
+type: "boolean",
+example: "true"
+},
+Reason: {
+description: "由注册局返回的不可注册原因。
+>根据注册局的不同，返回的不可注册原因不一致。
+",
+type: "string",
+example: "In use"
+},
+StaticPriceInfo: {
+type: "object",
+itemNode: true,
+properties: {
+PriceInfo: {
+description: "静态价格信息",
+type: "array",
+items: {
+type: "object",
+properties: {
+action: {
+description: "操作类型
+
+- activate：新购",
+type: "string",
+example: "activate"
+},
+money: {
+description: "金额，单位元。",
+type: "number",
+format: "double",
+example: "78.0"
+},
+period: {
+description: "周期，单位月。",
+type: "integer",
+format: "int64",
+example: "12"
+}
+}
+}
+}
+}
+}
+}
+}
+}
+},
+responseDemo: "[{"type":"json","example":"{\n  \"RequestId\": \"BA7A4FD4-EB9A-4A20-BB0C-9AEB15634DC1\",\n  \"Avail\": \"1\",\n  \"Price\": 1286,\n  \"DomainName\": \"test**.xin\",\n  \"Premium\": \"true\",\n  \"DynamicCheck\": true,\n  \"Reason\": \"In use\",\n  \"StaticPriceInfo\": {\n    \"PriceInfo\": [\n      {\n        \"action\": \"activate\",\n        \"money\": 78,\n        \"period\": 12\n      }\n    ]\n  }\n}","errorExample":"{\n    \"RequestId\": \"BA7A4FD4-EB9A-4A20-BB0C-9AEB15634DC1\",\n    \"DomainName\": \"abc.xin\",\n    \"Avail\": 0,\n    \"Premium\": false,\n    \"Reason\": \"\",\n    \"Price\": 1286\n}"},{"type":"xml","example":"<CheckDomain>\n    <RequestId>BA7A4FD4-EB9A-4A20-BB0C-9AEB15634DC1</RequestId>\n    <DomainName>test**.xin</DomainName>\n    <Avail>1</Avail>\n    <Premium>false</Premium>\n    <Reason></Reason>\n    <Price>1286</Price>\n</CheckDomain>","errorExample":"<CheckDomain>\n    <RequestId>BA7A4FD4-EB9A-4A20-BB0C-9AEB15634DC1</RequestId>\n    <DomainName>abc.xin</DomainName>\n    <Avail>1</Avail>\n    <Premium>true</Premium>\n    <Reason></Reason>\n    <Price>1286</Price>\n</CheckDomain>"}]",
+title: "检查域名是否可以注册",
+summary: "调用CheckDomain检查域名是否可以注册。",
+description: "有关域名的合法性要求，请参见[域名合法性](~~67788~~)。
+
+> 调用CheckDomain接口时有频率限制，同一阿里云账号（主账号）及其RAM用户（子账号）调用该接口的限制为10QPS，接口总量限制为100QPS。",
+requestParamsDescription: " ",
+responseParamsDescription: " ",
+extraInfo: " "
+}

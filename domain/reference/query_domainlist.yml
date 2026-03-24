@@ -1,0 +1,495 @@
+QueryDomainList: {
+summary: "分页查询自己账户下的域名列表。",
+methods: [
+"post",
+"get"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "read",
+systemTags: {
+operationType: "get",
+riskType: "none",
+chargeType: "free",
+abilityTreeNodes: [
+"FEATUREdomain7EGRPF"
+]
+},
+parameters: [
+{
+name: "EndExpirationDate",
+in: "query",
+schema: {
+description: "查询域名到期日期的结束时间，计算方式为UTC时间1970年1月1日0点距离需要查询时间的毫秒数，目前仅支持按天查询。",
+type: "integer",
+format: "int64",
+required: false,
+example: "1522080000000"
+}
+},
+{
+name: "StartExpirationDate",
+in: "query",
+schema: {
+description: "查询域名到期日期的开始时间，计算方式为UTC时间1970年1月1日0点距离需要查询时间的毫秒数，目前仅支持按天查询。",
+type: "integer",
+format: "int64",
+required: false,
+example: "1522080000000"
+}
+},
+{
+name: "UserClientIp",
+in: "query",
+schema: {
+description: "用户IP，可以设置为**127.0.0.1**。",
+type: "string",
+required: false,
+example: "127.0.0.1"
+}
+},
+{
+name: "Lang",
+in: "query",
+schema: {
+description: "接口返回错误信息语言。取值：
+- **zh**：中文。
+- **en**：英文。
+
+默认值为**en**。",
+type: "string",
+required: false,
+example: "en",
+default: "en"
+}
+},
+{
+name: "QueryType",
+in: "query",
+schema: {
+description: "列表查询类型。取值：
+- **1**：急需续费列表。
+- **2**：急需赎回列表。
+                           ",
+type: "string",
+required: false,
+example: "1"
+}
+},
+{
+name: "StartRegistrationDate",
+in: "query",
+schema: {
+description: "查询域名注册日期的开始时间，计算方式为UTC时间1970年1月1日0点距离现在的毫秒数，目前仅支持按天查询。",
+type: "integer",
+format: "int64",
+required: false,
+example: "1522080000000"
+}
+},
+{
+name: "EndRegistrationDate",
+in: "query",
+schema: {
+description: "查询域名注册日期的结束时间，计算方式为UTC时间1970年1月1日0点距离现在的毫秒数，目前仅支持按天查询。",
+type: "integer",
+format: "int64",
+required: false,
+example: "1522080000000"
+}
+},
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "域名，可在域名列表中搜索该域名。",
+type: "string",
+required: false,
+example: "test.com"
+}
+},
+{
+name: "OrderByType",
+in: "query",
+schema: {
+description: "业务内容（如注册时间、过期时间）的排序顺序。取值：
+- **ASC**：升序。
+- **DESC**：倒序。
+> 不传此参数默认为**DESC**。",
+type: "string",
+required: false,
+example: "ASC"
+}
+},
+{
+name: "OrderKeyType",
+in: "query",
+schema: {
+description: "排序字段。取值：
+- **RegistrationDate**：根据注册时间排序。
+- **ExpirationDate**：根据到期时间排序。
+
+> 不传此参数时，默认以入库时间排序。",
+type: "string",
+required: false,
+example: "RegistrationDate"
+}
+},
+{
+name: "ProductDomainType",
+in: "query",
+schema: {
+description: "域名类型。取值：
+- **New gTLD**：新顶级域。
+- **gTLD**：通用顶级域。
+- **ccTLD**：国别域。
+                           ",
+type: "string",
+required: false,
+example: "New gTLD"
+}
+},
+{
+name: "PageNum",
+in: "query",
+schema: {
+description: "域名列表的分页页码。",
+type: "integer",
+format: "int32",
+required: true,
+example: "1"
+}
+},
+{
+name: "PageSize",
+in: "query",
+schema: {
+description: "域名列表的分页大小。",
+type: "integer",
+format: "int32",
+required: true,
+example: "10"
+}
+},
+{
+name: "DomainGroupId",
+in: "query",
+schema: {
+description: "<props="china">域名分组ID，可使用查询域名分组的[QueryDomainGroupList](~~69362~~)接口获取。</props>
+<props="intl">域名分组ID。</props>
+",
+type: "string",
+required: false,
+example: "123456"
+}
+},
+{
+name: "ResourceGroupId",
+in: "query",
+schema: {
+description: "资源组id。",
+type: "string",
+required: false,
+example: "rg-aek2indvyxgpfti"
+}
+},
+{
+name: "Tag",
+in: "query",
+style: "repeatList",
+schema: {
+description: "标签列表",
+type: "array",
+items: {
+description: "标签。",
+type: "object",
+properties: {
+Key: {
+description: "标签键。",
+type: "string",
+required: false,
+example: "备注"
+},
+Value: {
+description: "标签值。",
+type: "string",
+required: false,
+example: "标签1"
+}
+},
+required: false
+},
+required: false,
+maxItems: 21
+}
+},
+{
+name: "Ccompany",
+in: "query",
+schema: {
+description: "域名所有者名称。",
+type: "string",
+required: false,
+example: "广州金烨再生资源回收有限公司"
+}
+},
+{
+name: "Registrar",
+in: "query",
+schema: {
+type: "string",
+required: false
+}
+},
+{
+name: "Dns",
+in: "query",
+schema: {
+type: "string",
+required: false
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+PrePage: {
+description: "是否有上一页。",
+type: "boolean",
+example: "false"
+},
+CurrentPageNum: {
+description: "当前域名列表的分页页码。",
+type: "integer",
+format: "int32",
+example: "0"
+},
+RequestId: {
+description: "唯一请求识别码。",
+type: "string",
+example: "B7AB5469-5E38-4AA9-A920-C65B7A9C8E6E"
+},
+PageSize: {
+description: "域名分页列表的大小。",
+type: "integer",
+format: "int32",
+example: "5"
+},
+TotalPageNum: {
+description: "域名列表的总页数。",
+type: "integer",
+format: "int32",
+example: "1"
+},
+Data: {
+type: "object",
+itemNode: true,
+properties: {
+Domain: {
+description: "域名列表。",
+type: "array",
+items: {
+description: "域名列表。",
+type: "object",
+properties: {
+DomainAuditStatus: {
+description: "域名实名认证状态。取值：
+- **FAILED**：实名认证失败。
+- **SUCCEED**：实名认证成功。
+- **NONAUDIT**：未实名认证。
+- **AUDITING**：审核中。
+                           ",
+type: "string",
+example: "FAILED"
+},
+DomainGroupId: {
+description: "域名分组编号。",
+type: "string",
+example: "123456"
+},
+Remark: {
+description: "域名备注。",
+type: "string",
+example: "测试备注"
+},
+DomainGroupName: {
+description: "域名分组名称",
+type: "string",
+example: "测试分组"
+},
+RegistrationDate: {
+description: "注册时间。",
+type: "string",
+example: "2017-11-02 04:00:45"
+},
+InstanceId: {
+description: "实例编号。",
+type: "string",
+example: "ST20151102120031118"
+},
+DomainName: {
+description: "域名。",
+type: "string",
+example: "test.com"
+},
+ExpirationDateStatus: {
+description: "域名过期状态。取值：
+- **1**：域名未过期。
+- **2**：域名已过期。
+                           ",
+type: "string",
+example: "1"
+},
+ExpirationDate: {
+description: "域名到期日期。",
+type: "string",
+example: "2017-11-02 04:00:45"
+},
+RegistrantType: {
+description: "域名注册类型。取值：
+- **1**：个人。
+- **2**：企业。
+                           ",
+type: "string",
+example: "1"
+},
+ExpirationDateLong: {
+description: "域名到期时长，UTC时间1970年1月1日0点距离域名到期日的毫秒数。",
+type: "integer",
+format: "int64",
+example: "1522080000000"
+},
+ExpirationCurrDateDiff: {
+description: "域名到期日和当前的时间的天数差值。",
+type: "integer",
+format: "int32",
+example: "-30"
+},
+Premium: {
+description: "是否是溢价域名。",
+type: "boolean",
+example: "true"
+},
+RegistrationDateLong: {
+description: "注册时长，UTC时间1970年1月1日0点距离注册时间的毫秒数。",
+type: "integer",
+format: "int64",
+example: "1522080000000"
+},
+ProductId: {
+description: "产品ID。",
+type: "string",
+example: "2a"
+},
+DomainStatus: {
+description: "域名状态。取值：
+- **1**：急需续费。
+- **2**：急需赎回。
+- **3**：正常。
+                           ",
+type: "string",
+example: "3"
+},
+DomainType: {
+description: "域名类型。取值：
+- **New gTLD**。
+- **gTLD**。
+- **ccTLD**。",
+type: "string",
+example: "gTLD"
+},
+ResourceGroupId: {
+description: "域名资源组id。",
+type: "string",
+example: "rg-aek2yyciz557g3q"
+},
+Tag: {
+type: "object",
+itemNode: true,
+properties: {
+Tag: {
+description: "域名标签列表。",
+type: "array",
+items: {
+description: "域名标签。",
+type: "object",
+properties: {
+Key: {
+description: "标签键。",
+type: "string",
+example: "费用"
+},
+Value: {
+description: "标签的值。",
+type: "string",
+example: "标签1"
+}
+}
+}
+}
+}
+},
+Ccompany: {
+description: "域名所有者名称。",
+type: "string",
+example: "广州森林广告装饰有限公司"
+},
+ChgholderStatus: {
+description: "域名过户状态。取值：
+
+- **0**：域名状态正常。
+- **1**：域名正在过户中。
+- **2**：域名过户失败。",
+type: "string",
+example: "0"
+},
+Registrar: {
+type: "string"
+},
+DnsList: {
+type: "object",
+itemNode: true,
+properties: {
+DnsList: {
+type: "array",
+items: {
+type: "string"
+}
+}
+}
+}
+}
+}
+}
+}
+},
+TotalItemNum: {
+description: "域名总数。",
+type: "integer",
+format: "int32",
+example: "1"
+},
+NextPage: {
+description: "是否有下一页。",
+type: "boolean",
+example: "false"
+}
+}
+}
+}
+},
+responseDemo: "[{"type":"json","example":"{\n  \"PrePage\": false,\n  \"CurrentPageNum\": 0,\n  \"RequestId\": \"B7AB5469-5E38-4AA9-A920-C65B7A9C8E6E\",\n  \"PageSize\": 5,\n  \"TotalPageNum\": 1,\n  \"Data\": {\n    \"Domain\": [\n      {\n        \"DomainAuditStatus\": \"FAILED\",\n        \"DomainGroupId\": \"123456\",\n        \"Remark\": \"测试备注\",\n        \"DomainGroupName\": \"测试分组\",\n        \"RegistrationDate\": \"2017-11-02 04:00:45\",\n        \"InstanceId\": \"ST20151102120031118\",\n        \"DomainName\": \"test.com\",\n        \"ExpirationDateStatus\": \"1\",\n        \"ExpirationDate\": \"2017-11-02 04:00:45\",\n        \"RegistrantType\": \"1\",\n        \"ExpirationDateLong\": 1522080000000,\n        \"ExpirationCurrDateDiff\": -30,\n        \"Premium\": true,\n        \"RegistrationDateLong\": 1522080000000,\n        \"ProductId\": \"2a\",\n        \"DomainStatus\": \"3\",\n        \"DomainType\": \"gTLD\",\n        \"ResourceGroupId\": \"rg-aek2yyciz557g3q\",\n        \"Tag\": {\n          \"Tag\": [\n            {\n              \"Key\": \"费用\",\n              \"Value\": \"标签1\"\n            }\n          ]\n        },\n        \"Ccompany\": \"广州森林广告装饰有限公司\",\n        \"ChgholderStatus\": \"0\",\n        \"Registrar\": \"\",\n        \"DnsList\": {\n          \"DnsList\": [\n            \"\"\n          ]\n        }\n      }\n    ]\n  },\n  \"TotalItemNum\": 1,\n  \"NextPage\": false\n}","errorExample":"{\n  \"Data\": {\n    \"Domain\": [\n      {\n        \"ExpirationDate\": \"Nov 02,2019 04:00:45\",\n        \"InstanceId\": \"ST2015110212003800001928\",\n        \"RegistrationDate\": \"Nov 02,2017 04:00:45\",\n        \"DomainName\": \"fds234sdf.net\",\n        \"DomainType\": \"gTLD\"\n      }\n    ]\n  },\n  \"TotalItemNum\": 1,\n  \"PageSize\": 5,\n  \"CurrentPageNum\": 0,\n  \"RequestId\": \"77F90DA6-89AB-4074-80F3-E595CB57DF98\",\n  \"PrePage\": false,\n  \"TotalPageNum\": 1,\n  \"NextPage\": false\n}"},{"type":"xml","example":"<?xml version='1.0' encoding='UTF-8'?>\n<QueryDomainListResponse>\n    <Data>\n        <Domain>\n            <ExpirationDate>Nov 02,2019 04:00:45</expirationDate>\n            <InstanceId>ST20151102120031118</SaleId>\n            <RegistrationDate>Nov 02,2017 04:00:45</registrationDate>\n            <DomainName>test.com</DomainName>\n            <DomainType>gTLD</domainType>\n        </Domain>\n    </Data>\n    <TotalItemNum>1</TotalItemNum>\n    <PageSize>5</PageSize>\n    <CurrentPageNum>0</CurrentPageNum>\n    <RequestId>B7AB5469-5E38-4AA9-A920-C65B7A9C8E6E</RequestId>\n    <PrePage>false</PrePage>\n    <TotalPageNum>1</TotalPageNum>\n    <NextPage>false</NextPage>\n</QueryDomainListResponse>","errorExample":"<?xml version='1.0' encoding='UTF-8'?>\n<QueryDomainListResponse>\n    <Data>\n        <Domain>\n            <ExpirationDate>Nov 02,2019 04:00:45</expirationDate>\n            <InstanceId>ST20151102120031118</SaleId>\n            <RegistrationDate>Nov 02,2017 04:00:45</registrationDate>\n            <DomainName>test.com</DomainName>\n            <DomainType>gTLD</domainType>\n        </Domain>\n    </Data>\n    <TotalItemNum>1</TotalItemNum>\n    <PageSize>5</PageSize>\n    <CurrentPageNum>0</CurrentPageNum>\n    <RequestId>B7AB5469-5E38-4AA9-A920-C65B7A9C8E6E</RequestId>\n    <PrePage>false</PrePage>\n    <TotalPageNum>1</TotalPageNum>\n    <NextPage>false</NextPage>\n</QueryDomainListResponse>"}]",
+title: "分页查询自己账户下的域名列表",
+requestParamsDescription: " ",
+responseParamsDescription: " ",
+extraInfo: " "
+}
