@@ -1,0 +1,295 @@
+BatchSetCdnDomainConfig: {
+summary: "调用BatchSetCdnDomainConfig进行域名批量配置",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "write",
+systemTags: {
+operationType: "update",
+riskType: "none",
+chargeType: "free",
+abilityTreeCode: "111684",
+abilityTreeNodes: [
+"FEATUREcdn9UE6OO"
+]
+},
+parameters: [
+{
+name: "DomainNames",
+in: "query",
+schema: {
+description: "加速域名，多个域名用半角逗号（,）分隔，注意以下配置限制：
+
+- 一次最多传20个域名。
+- 域名个数乘以 Functions个数，小于等于50。",
+type: "string",
+required: true,
+example: "www.example.com"
+}
+},
+{
+name: "Functions",
+in: "query",
+schema: {
+description: "功能列表，一次传入最多50条，格式如下：
+
+- **functionName**（功能名称，必填）：可配置功能请参见[功能列表](~~388460~~)，多个参数之间用半角逗号（,）分隔。
+- **argName**（参数名称，必填）：**functionName**的配置项（可配置多个配置项）。
+- **argValue**（参数值，必填）：**functionName**的配置项的取值。
+- **parentid**（规则条件ID，非必填）：通过配置[域名配置功能参数](~~388460~~)中的功能函数**condition**（规则引擎），可以创建出规则条件（规则条件可以通过识别用户请求中携带的各种参数来匹配和过滤用户请求），每一个规则条件被创建以后都会生成一个对应的[configid](~~388994~~)，configid可以被当作ParentId参数被其他功能函数引用，这样规则条件就可以与功能配置一起组合形成更灵活的配置。
+
+**parentId**为 **-1**：表示删除该配置里面已有的规则条件。
+```[{
+   "functionArgs": [{
+     "argName": "功能参数A", 
+     "argValue": "功能参数A对应的值"
+    }, 
+  {
+    "argName": "功能参数B", 
+    "argValue": "功能参数B对应的值"
+     }], 
+ "functionName": "功能名称",
+ "parentId": 选填项，对应引用规则条件的configid
+}]
+```
+不使用**parentId**的情况下，配置示例如下：
+使用函数**origin_request_header**添加回源HTTP请求头的时候引用了**configid=222728944812032**的规则条件，请求参数如下：
+```[{
+        "functionArgs": [{
+            "argName": "header_operation_type",
+            "argValue": "add"
+        }, {
+            "argName": "header_name",
+            "argValue": "Accept-Encoding"
+        }, {
+            "argName": "header_value",
+            "argValue": "gzip"
+        }, {
+            "argName": "duplicate",
+            "argValue": "off"
+        }],
+        "functionName": "origin_request_header"
+}]
+```
+使用**parentId**的情况下，配置示例如下：
+使用函数**origin_request_header**添加回源HTTP请求头的时候引用了**configid=222728944812032**的规则条件，请求参数如下：
+```[{
+        "functionArgs": [{
+            "argName": "header_operation_type",
+            "argValue": "add"
+        }, {
+            "argName": "header_name",
+            "argValue": "Accept-Encoding"
+        }, {
+            "argName": "header_value",
+            "argValue": "gzip"
+        }, {
+            "argName": "duplicate",
+            "argValue": "off"
+        }],
+        "functionName": "origin_request_header",
+        "parentId": 222728944812032
+}]
+```
+对一个已经使用了**parentId**的功能配置删除对**parentId**的引用，配置示例如下：
+函数**origin_request_header**添加回源HTTP请求头的时候已经引用了**configid=222728944812032**的规则条件，现在要删掉对规则条件的引用，请求参数如下：
+```[{
+        "functionArgs": [{
+            "argName": "header_operation_type",
+            "argValue": "add"
+        }, {
+            "argName": "header_name",
+            "argValue": "Accept-Encoding"
+        }, {
+            "argName": "header_value",
+            "argValue": "gzip"
+        }, {
+            "argName": "duplicate",
+            "argValue": "off"
+        }],
+        "functionName": "origin_request_header",
+        "parentId": -1
+}]
+```",
+type: "string",
+required: true,
+example: "[{"functionArgs": [{"argName": "key","argValue": "Content-Encoding"},{"argName": "value","argValue": "gzip"}],"functionName": "set_resp_header"} ]"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "04F0F334-1335-436C-A1D7-6C044FE73368"
+},
+DomainConfigList: {
+type: "object",
+itemNode: true,
+properties: {
+DomainConfigModel: {
+description: "域名配置清单。",
+type: "array",
+items: {
+type: "object",
+properties: {
+ConfigId: {
+description: "配置ID，如果返回为0，则表示该条配置未配置成功，需要重新配置。",
+type: "integer",
+format: "int64",
+example: "1234567"
+},
+DomainName: {
+description: "域名。",
+type: "string",
+example: "www.example.com"
+},
+FunctionName: {
+description: "功能名称。",
+type: "string",
+example: "set_resp_header"
+}
+}
+}
+}
+}
+}
+}
+}
+}
+},
+errorCodes: {
+400: [
+{
+errorCode: "InvalidFunctions.Malformed",
+errorMessage: "The specified Functions is incorrectly formatted."
+},
+{
+errorCode: "InvalidArgValue.Malformed",
+errorMessage: "The specified ArgValue is invalid."
+},
+{
+errorCode: "Invalid%s.ValueNotSupported",
+errorMessage: "[%s] is not supported."
+},
+{
+errorCode: "Invalid%s.Malformed",
+errorMessage: "The specified ArgValue [%s] is invalid."
+},
+{
+errorCode: "MissingParameter%s",
+errorMessage: "The specified value of ArgName[%s] is missing."
+},
+{
+errorCode: "InvalidFunctionArgs.Malformed",
+errorMessage: "The specified FunctionArgs is invalid."
+},
+{
+errorCode: "MissingParameter",
+errorMessage: "The specified ArgValue is missing."
+},
+{
+errorCode: "InvalidHeaderKey.ValueNotSupported",
+errorMessage: "The specified value of parameter HeaderKey is not supported."
+},
+{
+errorCode: "TooManyDomains",
+errorMessage: "The count of domain is over 50."
+},
+{
+errorCode: "InvalidRule.Malformed",
+errorMessage: "%s"
+},
+{
+errorCode: "ConfigurationConflicts",
+errorMessage: "The staging environment has a configuration in effect and cannot modify the production environment configuration."
+},
+{
+errorCode: "InvalidFunction.NotSupported",
+errorMessage: "The domain is not supported to set the function."
+},
+{
+errorCode: "InvalidDomain.BelongToConfigGroup",
+errorMessage: "This Domain activated in configuration group and should modify by config group."
+},
+{
+errorCode: "EntityNotExist.Role",
+errorMessage: "EntityNotExist.Role"
+},
+{
+errorCode: "MissingParameterFunctions",
+errorMessage: "The specified value of Functions is missing."
+},
+{
+errorCode: "NoPermission.SLR",
+errorMessage: "The current user does not have permission to create servicelinkedrole. Please contact the Alibaba Cloud account or administrator to authorize AliyunCDNFullAccess or custom policy:Service Name:cdn-ddos.cdn.aliyuncs.com,Role: AliyunServiceRoleForCDNAccessingDDoS,Permission: ram: CreateServiceLinkedRole"
+},
+{
+errorCode: "ConfigExceedLimit",
+errorMessage: "Count of config entries exceeds the limit."
+},
+{
+errorCode: "EdgeScriptCountExceedLimit",
+errorMessage: "The number of rules exceeds the default limit."
+},
+{
+errorCode: "EdgeScripOptionsHasInnerConfig",
+errorMessage: "The extension has a background configuration or a parameter of this configuration is invalid. For more information, submit a ticket."
+},
+{
+errorCode: "EdgeScriptGrammarNotSupport",
+errorMessage: "A background customization rule exists or a parameter of this configuration is invalid. For more information, submit a ticket."
+},
+{
+errorCode: "EdgeScriptNotSupportJs",
+errorMessage: "JavaScript rules are not supported. For more information, submit a ticket."
+},
+{
+errorCode: "ServiceInvokeFailed",
+errorMessage: "Failed to invoke service."
+},
+{
+errorCode: "ConfigParentExceedLimit",
+errorMessage: "Config parent exceed limit."
+},
+{
+errorCode: "Function.InvalidParentId",
+errorMessage: "The specified parentId does not exist."
+},
+{
+errorCode: "BatchSetBusinessError",
+errorMessage: "some configs error:%s"
+},
+{
+errorCode: "ConfigDuplicate",
+errorMessage: "Duplicate configuration. This function has already been configured and cannot be added repeatedly."
+},
+{
+errorCode: "FunctionArgError",
+errorMessage: "The function parameter of the domain configuration is incorrect."
+}
+]
+},
+responseDemo: "[{"type":"json","example":"{\n  \"RequestId\": \"04F0F334-1335-436C-A1D7-6C044FE73368\",\n  \"DomainConfigList\": {\n    \"DomainConfigModel\": [\n      {\n        \"ConfigId\": 1234567,\n        \"DomainName\": \"www.example.com\",\n        \"FunctionName\": \"set_resp_header\"\n      }\n    ]\n  }\n}","errorExample":"[{\"functionArgs\":[{\"argName\":\"file_type\",\"argValue\":\"jpg\"},{\"argName\":\"ttl\",\"argValue\":\"18\"},{\"argName\":\"weight\",\"argValue\":\"30\"}],\"functionName\":\"filetype_based_ttl_set\",\"configId\":5068995}]"},{"type":"xml","example":"<BatchSetCdnDomainConfigResponse>\n<RequestId>04F0F334-1335-436C-A1D7-6C044FE73368</RequestId>\n<DomainConfigModel>\n    <DomainName>www.example.com</DomainName>\n    <ConfigId>1234567</ConfigId>\n    <FunctionName>set_resp_header</FunctionName>\n</DomainConfigModel>\n</BatchSetCdnDomainConfigResponse>","errorExample":"http://cdn.aliyuncs.com/?Action=BatchSetCdnDomainConfig\n&DomainName=example.com\n&Functions=[{\"functionArgs\":[{\"argName\":\"domain_name\",\"argValue\":\"api.hellodtworld.com\"}],\"functionName\":\"set_req_host_header\"}]\n&<公共请求参数>"}]",
+title: "批量配置域名",
+description: "- 单用户调用频率：3次/秒。
+- 支持批量配置域名，多个域名用半角逗号（,）分隔，一次最多支持配置50个域名。
+- 调用BatchSetCdnDomainConfig给域名配置某些功能后，将会生成唯一的ConfigId，通过ConfigId可以完成更新和删除配置操作。具体使用方法，请参见[ConfigId使用与查询](~~388994~~)。",
+requestParamsDescription: " ",
+responseParamsDescription: " ",
+extraInfo: " "
+}

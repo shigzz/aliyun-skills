@@ -1,8 +1,8 @@
 ---
 name: aliyun-cdn-skill
 description: >-
-  通过 Python SDK（alibabacloud_cdn20180510）调用阿里云 CDN OpenAPI：查询加速域名列表与详情、域名配置、CNAME 解析检测、备案查询、添加域名、批量更新、启用停用域名、HTTPS 证书设置等。
-  适用于「列出 CDN 加速域名」「查域名详情与配置」「检测 CNAME」「查备案」「加域名/批量改配/启停/配证书」等场景。
+  通过 Python SDK（alibabacloud_cdn20180510）调用阿里云 CDN OpenAPI：查询加速域名列表与详情、域名配置、CNAME 解析检测、备案查询、域名归属校验（查询校验内容/校验数据、提交校验）、添加域名、批量更新、批量设置域名功能配置、缓存刷新、启用域名、HTTPS 证书设置等。
+  适用于「列出 CDN 加速域名」「查详情与配置」「检测 CNAME」「查备案」「域名归属验证」「加域名/批量改配/批量设功能项/刷缓存/启停/配证书」等场景。
   API 契约见 reference/ 下 YML；可运行示例见 scripts/；初次使用请安装 scripts/requirements.txt 中的依赖。
 ---
 
@@ -19,8 +19,13 @@ aliyun-cdn-skills/
 │   ├── describe_cdndomain_configs.yml
 │   ├── describe_domain_cname.yml
 │   ├── check_cdndomain_icp.yml
+│   ├── describe_verify_content.yml
+│   ├── describe_domain_verify_data.yml
+│   ├── verify_domain_owner.yml
 │   ├── add_cdndomain.yml
 │   ├── batch_update_cdndomain.yml
+│   ├── batch_set_cdndomain_config.yml
+│   ├── refresh_object_caches.yml
 │   ├── start_cdndomain.yml
 │   └── set_cdndomain_sslcertificate.yml
 └── scripts/                      # 可执行脚本与依赖清单
@@ -29,8 +34,13 @@ aliyun-cdn-skills/
     ├── describe_cdndomain_configs.py
     ├── describe_domain_cname.py
     ├── check_cdndomain_icp.py
+    ├── describe_verify_content.py
+    ├── describe_domain_verify_data.py
+    ├── verify_domain_owner.py
     ├── add_cdndomain.py
     ├── batch_update_cdndomain.py
+    ├── batch_set_cdndomain_config.py
+    ├── refresh_object_caches.py
     ├── start_cdndomain.py
     ├── set_cdndomain_sslcertificate.py
     └── requirements.txt
@@ -49,15 +59,20 @@ aliyun-cdn-skills/
 | 查询域名功能配置 | DescribeCdnDomainConfigs | 读 | 按功能名或 ConfigId 查询域名上的功能配置 | [describe_cdndomain_configs.yml](reference/describe_cdndomain_configs.yml) | [describe_cdndomain_configs.py](scripts/describe_cdndomain_configs.py) |
 | 检测 CNAME | DescribeDomainCname | 读 | 检测加速域名 CNAME 是否解析到预期 | [describe_domain_cname.yml](reference/describe_domain_cname.yml) | [describe_domain_cname.py](scripts/describe_domain_cname.py) |
 | 查询备案 | CheckCdnDomainICP | 读 | 查询域名是否备案 | [check_cdndomain_icp.yml](reference/check_cdndomain_icp.yml) | [check_cdndomain_icp.py](scripts/check_cdndomain_icp.py) |
+| 查询归属校验内容 | DescribeVerifyContent | 读 | 查询域名归属校验所需内容（单域名） | [describe_verify_content.yml](reference/describe_verify_content.yml) | [describe_verify_content.py](scripts/describe_verify_content.py) |
+| 查询域名校验数据 | DescribeDomainVerifyData | 读 | 按全球资源计划等返回对应校验数据（单域名） | [describe_domain_verify_data.yml](reference/describe_domain_verify_data.yml) | [describe_domain_verify_data.py](scripts/describe_domain_verify_data.py) |
+| 校验域名归属 | VerifyDomainOwner | 写 | 对域名归属权进行校验（单域名） | [verify_domain_owner.yml](reference/verify_domain_owner.yml) | [verify_domain_owner.py](scripts/verify_domain_owner.py) |
 | 添加加速域名 | AddCdnDomain | 写 | 新增加速域名 | [add_cdndomain.yml](reference/add_cdndomain.yml) | [add_cdndomain.py](scripts/add_cdndomain.py) |
 | 批量更新域名 | BatchUpdateCdnDomain | 写 | 批量更新加速域名基本信息 | [batch_update_cdndomain.yml](reference/batch_update_cdndomain.yml) | [batch_update_cdndomain.py](scripts/batch_update_cdndomain.py) |
+| 批量设置域名配置 | BatchSetCdnDomainConfig | 写 | 批量为多个域名设置功能配置（域名数与功能项数乘积等限制见 YML） | [batch_set_cdndomain_config.yml](reference/batch_set_cdndomain_config.yml) | [batch_set_cdndomain_config.py](scripts/batch_set_cdndomain_config.py) |
+| 刷新缓存 | RefreshObjectCaches | 写 | URL/目录批量刷新，使节点缓存立即失效并回源 | [refresh_object_caches.yml](reference/refresh_object_caches.yml) | [refresh_object_caches.py](scripts/refresh_object_caches.py) |
 | 启用域名 | StartCdnDomain | 写 | 启用处于停用状态的加速域名 | [start_cdndomain.yml](reference/start_cdndomain.yml) | [start_cdndomain.py](scripts/start_cdndomain.py) |
 | 设置 HTTPS 证书 | SetCdnDomainSSLCertificate | 写 | 设置证书开关与证书内容（上传/CAS 等） | [set_cdndomain_sslcertificate.yml](reference/set_cdndomain_sslcertificate.yml) | [set_cdndomain_sslcertificate.py](scripts/set_cdndomain_sslcertificate.py) |
 
 **重要说明**：
 
 - 每个能力对应一个独立 API，**无固定调用顺序**；可按业务组合（例如先列表再详情、加域名前做备案检查）。
-- **写操作**（添加、批量更新、启用、证书）需要账号或 RAM 用户具备相应 CDN **写权限**；生产环境变更前建议先在控制台或测试域名验证。
+- **写操作**（添加、批量更新、批量设配置、刷新缓存、归属校验提交、启用、证书等）需要账号或 RAM 用户具备相应 CDN **写权限**；生产环境变更前建议先在控制台或测试域名验证。**RefreshObjectCaches** 会使缓存立即失效、回源量增加，请控制批量与频率。
 
 ---
 
@@ -147,6 +162,9 @@ client = Cdn20180510Client(config)
 - 运维排查：DescribeUserDomains → DescribeCdnDomainDetail / DescribeCdnDomainConfigs。
 - 接入与解析：DescribeDomainCname 验证 CNAME；DescribeCdnDomainDetail 查看分配的 CNAME。
 - 新域名上线前：CheckCdnDomainICP 与业务要求核对后，再 AddCdnDomain 或后续改配。
+- 域名归属：DescribeVerifyContent / DescribeDomainVerifyData 获取校验方式与数据，按控制台或文档完成 DNS/文件等验证后，再 **VerifyDomainOwner** 提交校验（具体参数与流程以 YML、官方文档为准）。
+- 批量改功能项：BatchSetCdnDomainConfig 与 BatchUpdateCdnDomain 关注点不同（前者偏域名上的 **Functions** 批量配置），按 YML 限制控制单次域名数与功能项数。
+- 发布与缓存：**RefreshObjectCaches** 在资源更新后刷新 URL/目录；注意单次任务 URL 域名个数等配额（见 YML）。
 - HTTPS：DescribeCdnDomainDetail 看证书状态后，SetCdnDomainSSLCertificate 更新证书或开关。
 
 ## 错误处理建议
@@ -182,6 +200,18 @@ client = Cdn20180510Client(config)
 
 查询域名备案相关信息。**读接口**，用于合规核对。详见 [reference/check_cdndomain_icp.yml](reference/check_cdndomain_icp.yml)，示例：[scripts/check_cdndomain_icp.py](scripts/check_cdndomain_icp.py)。
 
+## DescribeVerifyContent
+
+查询加速域名**归属校验**所需内容（单域名）。**读接口**。详见 [reference/describe_verify_content.yml](reference/describe_verify_content.yml)，示例：[scripts/describe_verify_content.py](scripts/describe_verify_content.py)。
+
+## DescribeDomainVerifyData
+
+根据域名及是否开启**全球资源计划**等条件，返回对应的校验数据/内容（单域名）。**读接口**。详见 [reference/describe_domain_verify_data.yml](reference/describe_domain_verify_data.yml)，示例：[scripts/describe_domain_verify_data.py](scripts/describe_domain_verify_data.py)。
+
+## VerifyDomainOwner
+
+对域名归属权进行校验（单域名）。OpenAPI 标记为写类操作，调用前通常需先完成 DNS/文件等验证步骤。**写接口**。详见 [reference/verify_domain_owner.yml](reference/verify_domain_owner.yml)，示例：[scripts/verify_domain_owner.py](scripts/verify_domain_owner.py)。
+
 ## AddCdnDomain
 
 新增加速域名。**写接口**，需具备创建与配置权限；参数较多（源站、加速区域、业务类型等），务必对照 YML 填写。详见 [reference/add_cdndomain.yml](reference/add_cdndomain.yml)，示例：[scripts/add_cdndomain.py](scripts/add_cdndomain.py)。
@@ -189,6 +219,14 @@ client = Cdn20180510Client(config)
 ## BatchUpdateCdnDomain
 
 批量更新加速域名基本信息。**写接口**，变更前建议确认影响范围。详见 [reference/batch_update_cdndomain.yml](reference/batch_update_cdndomain.yml)，示例：[scripts/batch_update_cdndomain.py](scripts/batch_update_cdndomain.py)。
+
+## BatchSetCdnDomainConfig
+
+对多个加速域名**批量设置功能配置**（`Functions` 等）。**写接口**；单次域名个数、与功能项数量的乘积上限等以 YML 为准。详见 [reference/batch_set_cdndomain_config.yml](reference/batch_set_cdndomain_config.yml)，示例：[scripts/batch_set_cdndomain_config.py](scripts/batch_set_cdndomain_config.py)。
+
+## RefreshObjectCaches
+
+按 URL 或目录**刷新**节点缓存，使对应对象缓存失效并回源拉取最新内容；支持批量，**写接口**。注意回源与配额（单次 URL 中域名个数等见 YML）。详见 [reference/refresh_object_caches.yml](reference/refresh_object_caches.yml)，示例：[scripts/refresh_object_caches.py](scripts/refresh_object_caches.py)。
 
 ## StartCdnDomain
 
@@ -208,5 +246,5 @@ client = Cdn20180510Client(config)
 
 ## 能力扩展
 
-本 skill 可继续增加其他 CDN OpenAPI（例如停用域名、刷新预热等），建议同样以「reference YML + scripts 示例 + 本表追加一行」的方式扩展，保持与 [aliyun-domain-skills](../aliyun-domain-skills/SKILL.md) 一致的使用体验。
+本 skill 可继续增加其他 CDN OpenAPI（例如停用域名、预热等），建议同样以「reference YML + scripts 示例 + 本表追加一行」的方式扩展，保持与 [aliyun-domain-skills](../aliyun-domain-skills/SKILL.md) 一致的使用体验。
 

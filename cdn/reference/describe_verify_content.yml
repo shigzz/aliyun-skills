@@ -1,0 +1,61 @@
+DescribeVerifyContent: {
+summary: "调用DescribeVerifyContent查询归属校验内容。",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "read",
+systemTags: {
+operationType: "get",
+abilityTreeCode: "111847",
+abilityTreeNodes: [
+"FEATUREcdnRLQ471"
+]
+},
+parameters: [
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "只支持单个域名。",
+type: "string",
+required: true,
+example: "example.com"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+Content: {
+description: "校验内容。",
+type: "string",
+example: "verify_dffeb6610035dcb77b413a59c32cd91f"
+},
+RequestId: {
+description: "该条任务请求ID。",
+type: "string",
+example: "34AB41F1-04A5-496F-8C8D-634BDBE6A9FB"
+}
+}
+}
+}
+},
+responseDemo: "[{"type":"json","example":"{\n  \"Content\": \"verify_dffeb6610035dcb77b413a59c32cd91f\",\n  \"RequestId\": \"34AB41F1-04A5-496F-8C8D-634BDBE6A9FB\"\n}","errorExample":""},{"type":"xml","example":"<DescribeVerifyContentResponse>\n<Content>verify_dffeb6610035dcb77b413a59c32cd91f</Content>\n<RequestId>34AB41F1-04A5-496F-8C8D-634BDBE6A9FB</RequestId>\n</DescribeVerifyContentResponse>","errorExample":""}]",
+title: "查询校验归属权内容",
+description: "> 单用户调用频率：100次/秒。",
+requestParamsDescription: " ",
+responseParamsDescription: " ",
+extraInfo: " "
+}

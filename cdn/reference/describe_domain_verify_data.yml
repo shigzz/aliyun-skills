@@ -1,0 +1,104 @@
+DescribeDomainVerifyData: {
+summary: "调用DescribeDomainVerifyData，根据加速域名是否开启全球资源计划，返回对应的校验内容。",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "read",
+deprecated: false,
+systemTags: {
+operationType: "get",
+riskType: "none",
+chargeType: "free",
+abilityTreeCode: "178430",
+abilityTreeNodes: [
+"FEATUREcdnRLQ471"
+],
+tenantRelevance: "publicInformation"
+},
+parameters: [
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "加速域名，仅支持查询单个域名。",
+type: "string",
+required: true,
+example: "www.yourdomain.com"
+}
+},
+{
+name: "GlobalResourcePlan",
+in: "query",
+schema: {
+description: "是否开启全球资源计划。
+支持：
+- **on**（开启）
+- **off**（不开启）",
+type: "string",
+required: false,
+enumValueTitles: {
+off: "off",
+on: "on"
+},
+example: "off"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "F61CDR30-E83C-4FDA-BF73-9A94CDD44229"
+},
+Content: {
+description: "校验内容。",
+type: "object",
+properties: {
+verifyCode: {
+description: "校验的TXT记录目标值。",
+type: "string",
+example: "verify_2bc6e4836c9f6072869de1c5a269ef09"
+},
+verifyKey: {
+description: "TXT记录的子域名。",
+type: "string",
+example: "verification"
+},
+RootDomain: {
+description: "域名对应的根域名的名称。",
+type: "string",
+enumValueTitles: {
+example.com: "example.com"
+},
+example: "example.com"
+}
+},
+example: "{
+      "verifiCode": "uy0-DxxxxxxxxKl-JnJY4",
+      "verifyKey": "_acxxxe-xxxx"
+}"
+}
+}
+}
+}
+},
+staticInfo: {
+returnType: "synchronous"
+},
+responseDemo: "[{"errorExample":"","example":"{\n  \"RequestId\": \"F61CDR30-E83C-4FDA-BF73-9A94CDD44229\",\n  \"Content\": {\n    \"verifyCode\": \"verify_2bc6e4836c9f6072869de1c5a269ef09\",\n    \"verifyKey\": \"verification\",\n    \"RootDomain\": \"example.com\"\n  }\n}","type":"json"}]",
+title: "查询域名归属校验内容"
+}
