@@ -107,13 +107,23 @@
 
 ## 快速开始
 
-### 1. 安装
+### 1. 安装 Skills
 
-使用 Claude Code 的 skills 命令安装：
+你可以安装整个技能集合，也可以按需安装单个 skill。
+
+#### 方式一：安装整个技能集合（推荐）
 
 ```bash
 npx skills add https://github.com/shigzz/aliyun-skills
 ```
+
+#### 方式二：按需安装单个 Skill
+
+| Skill | 安装命令 |
+|-------|----------|
+| 实例账单查询 | `npx skills add https://github.com/shigzz/aliyun-skills --skill aliyun-instance-bill` |
+| 域名查询 | `npx skills add https://github.com/shigzz/aliyun-skills --skill aliyun-domain-skill` |
+| SLS 日志查询 | `npx skills add https://github.com/shigzz/aliyun-skills --skill aliyun-sls-skills` |
 
 ### 2. 配置阿里云访问凭据
 
