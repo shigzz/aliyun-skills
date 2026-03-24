@@ -1,0 +1,171 @@
+UpdateDomainRecord: {
+summary: "根据传入参数修改解析记录。",
+methods: [
+"post",
+"get"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+},
+{
+BearerToken: [ ]
+}
+],
+operationType: "readAndWrite",
+deprecated: false,
+systemTags: {
+operationType: "update",
+riskType: "none",
+chargeType: "free",
+abilityTreeNodes: [
+"FEATUREdnsKT3CVU"
+]
+},
+parameters: [
+{
+name: "Lang",
+in: "query",
+schema: {
+description: "设置请求和接收消息的语言类型，默认为**zh**。取值：
+- **zh**：中文
+- **en**：英文",
+type: "string",
+required: false,
+example: "en"
+}
+},
+{
+name: "UserClientIp",
+in: "query",
+schema: {
+description: "用户端IP。",
+type: "string",
+required: false,
+example: "192.0.2.1"
+}
+},
+{
+name: "RecordId",
+in: "query",
+schema: {
+description: "解析记录的ID。可通过调取[DescribeDomainRecords](~~2357159~~)接口获取。",
+type: "string",
+required: true,
+docRequired: true,
+example: "99*******"
+}
+},
+{
+name: "RR",
+in: "query",
+schema: {
+description: "主机记录。
+当设置主域名解析（如example.com）时，主机记录应填写"@"符号。",
+type: "string",
+required: true,
+docRequired: true,
+example: "@"
+}
+},
+{
+name: "Type",
+in: "query",
+schema: {
+description: "解析记录类型，参见：
+<props="china">[解析记录类型格式](https://help.aliyun.com/document_detail/29805.html)。</props>
+<props="intl">[解析记录类型格式](https://www.alibabacloud.com/help/zh/doc-detail/29805.htm)。</props>",
+type: "string",
+required: true,
+docRequired: true,
+example: "A"
+}
+},
+{
+name: "Value",
+in: "query",
+schema: {
+description: "记录值。",
+type: "string",
+required: true,
+docRequired: true,
+example: "192.0.2.1"
+}
+},
+{
+name: "TTL",
+in: "query",
+schema: {
+description: "解析生效时间，默认为600秒（10分钟）。
+参见：
+<props="china">[TTL定义说明](https://help.aliyun.com/document_detail/29806.html)。</props>
+<props="intl">[TTL定义说明](https://www.alibabacloud.com/help/zh/doc-detail/29806.htm)。</props>",
+type: "integer",
+format: "int64",
+required: false,
+maximum: "86400",
+minimum: "1",
+example: "600",
+default: "600"
+}
+},
+{
+name: "Priority",
+in: "query",
+schema: {
+description: "MX记录的优先级，取值范围：`[1,50]`。
+
+记录类型为MX记录时，此参数必填。",
+type: "integer",
+format: "int64",
+required: false,
+maximum: "65535",
+minimum: "0",
+example: "1"
+}
+},
+{
+name: "Line",
+in: "query",
+schema: {
+description: "解析线路，默认为**default**。
+参见：
+<props="china">[解析线路枚举](https://help.aliyun.com/document_detail/29807.html)。</props>
+<props="intl">[解析线路枚举](https://www.alibabacloud.com/help/zh/doc-detail/29807.htm)。</props>",
+type: "string",
+required: false,
+example: "default",
+default: "default"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "536E9CAD-DB30-4647-AC87-AA5CC38C5382"
+},
+RecordId: {
+description: "解析记录的ID。",
+type: "string",
+example: "99******"
+}
+}
+}
+}
+},
+eventInfo: {
+enable: false,
+eventNames: [ ]
+},
+responseDemo: "[{"type":"json","example":"{\n  \"RequestId\": \"536E9CAD-DB30-4647-AC87-AA5CC38C5382\",\n  \"RecordId\": \"99******\"\n}","errorExample":""},{"type":"xml","example":"<UpdateDomainRecordResponse>\n    <RequestId>536E9CAD-DB30-4647-AC87-AA5CC38C5382</RequestId>\n    <RecordId>9999985</RecordId>\n</UpdateDomainRecordResponse>","errorExample":""}]",
+title: "修改域名解析记录"
+}

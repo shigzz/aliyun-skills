@@ -1,0 +1,360 @@
+DescribeDomainRecords: {
+summary: "根据传入参数获取指定主域名的所有解析记录列表。",
+methods: [
+"post",
+"get"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+},
+{
+BearerToken: [ ]
+}
+],
+operationType: "readAndWrite",
+deprecated: false,
+systemTags: {
+operationType: "get",
+riskType: "none",
+chargeType: "free",
+abilityTreeNodes: [
+"FEATUREdnsKT3CVU"
+]
+},
+parameters: [
+{
+name: "Lang",
+in: "query",
+schema: {
+description: "设置请求和接收消息的语言类型，默认为**zh**。取值：
+- **zh**：中文
+- **en**：英文",
+type: "string",
+required: false,
+example: "en"
+}
+},
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "域名名称。<props="china">可通过调用[DescribeDomains](https://help.aliyun.com/zh/dns/api-alidns-2015-01-09-describedomains?spm=a2c4g.11186623.help-menu-search-29697.d_0)获取</props>
+<props="intl">可通过调用[DescribeDomains](https://www.alibabacloud.com/help/zh/dns/api-alidns-2015-01-09-describedomains?spm=a2c63.p38356.help-menu-search-29697.d_0)获取</props>",
+type: "string",
+required: true,
+docRequired: true,
+example: "example.com"
+}
+},
+{
+name: "PageNumber",
+in: "query",
+schema: {
+description: "当前页数，起始值为**1**，默认为**1**。",
+type: "integer",
+format: "int64",
+required: false,
+minimum: "1",
+example: "1",
+default: "1"
+}
+},
+{
+name: "PageSize",
+in: "query",
+schema: {
+description: "分页查询时设置的每页行数，最大值**500**，默认为**20**。",
+type: "integer",
+format: "int64",
+required: false,
+maximum: "500",
+minimum: "1",
+example: "20",
+default: "20"
+}
+},
+{
+name: "KeyWord",
+in: "query",
+schema: {
+description: "关键字。",
+type: "string",
+required: false,
+example: "test"
+}
+},
+{
+name: "RRKeyWord",
+in: "query",
+schema: {
+description: "主机记录的关键字，按照 RRKeyWord（前后模糊匹配）模式搜索，不区分大小写。",
+type: "string",
+required: false,
+example: "www"
+}
+},
+{
+name: "TypeKeyWord",
+in: "query",
+schema: {
+description: "解析类型的关键字，按照全匹配搜索，不区分大小写。",
+type: "string",
+required: false,
+example: "MX"
+}
+},
+{
+name: "ValueKeyWord",
+in: "query",
+schema: {
+description: "记录值的关键字，按照 ValueKeyWord（前后模糊匹配）模式搜索，不区分大小写。",
+type: "string",
+required: false,
+example: "com"
+}
+},
+{
+name: "OrderBy",
+in: "query",
+schema: {
+description: "排序方式。按照解析添加的时间从新到旧排序。",
+type: "string",
+required: false,
+example: "default"
+}
+},
+{
+name: "Direction",
+in: "query",
+schema: {
+description: "排序方向。取值范围：DESC、ASC。默认为：DESC。",
+type: "string",
+required: false,
+example: "DESC"
+}
+},
+{
+name: "SearchMode",
+in: "query",
+schema: {
+description: "搜索模式，取值：**LIKE/EXACT/ADVANCED/COMBINATION。**
+- 填入LIKE或EXACT时，请使用KeyWord参数。（传入RRKeyWord、TypeKeyWord、ValueKeyWord、Type、Line、Status参数无效）
+- 填入ADVANCED时，请使用RRKeyWord、TypeKeyWord、ValueKeyWord、Type、Line、Status，其中RRKeyWord、ValueKeyWord为模糊匹配
+- 填入COMBINATION，请使用RRKeyWord、TypeKeyWord、ValueKeyWord、Type、Line、Status参数，所有参数均为精确匹配。
+- 不传值：
+    - keyWord传值，搜索模式取”LIKE“值。
+    - keyWord不传值，RRKeyWord和ValueKeyWord支持模糊查询，TypeKeyWord和Type、Line、Status支持精确查询。",
+type: "string",
+required: false,
+example: "LIKE"
+}
+},
+{
+name: "GroupId",
+in: "query",
+schema: {
+description: "指域名分组ID
+
+- 如不传GroupId，则在全部域名下查询。
+
+- 如GroupId为0，则返回空数据。
+
+- 如GroupId为-1，则在默认分组（指未设置分组的域名）下查询。
+
+- 如GroupId为-2，则在全部域名下查询。
+
+- 如GroupId不符合上述条件，则按GroupId查询并返回结果。
+<props="china">可通过调用[DescribeDomainGroups ](https://help.aliyun.com/zh/dns/api-alidns-2015-01-09-describedomaingroups?spm=a2c4g.11186623.help-menu-search-29697.d_0)获取</props>
+<props="intl">可通过调用[DescribeDomainGroups ](https://www.alibabacloud.com/help/zh/dns/api-alidns-2015-01-09-describedomaingroups?spm=a2c63.p38356.help-menu-search-29697.d_0)获取</props>",
+type: "integer",
+format: "int64",
+required: false,
+example: "2****"
+}
+},
+{
+name: "Type",
+in: "query",
+schema: {
+description: "解析记录类型，参见：
+
+<props="china">[解析记录类型格式](https://help.aliyun.com/document_detail/29805.html)</props>
+<props="intl">[解析记录类型格式](https://www.alibabacloud.com/help/zh/doc-detail/29805.htm)</props>
+",
+type: "string",
+required: false,
+example: "A"
+}
+},
+{
+name: "Line",
+in: "query",
+schema: {
+description: "解析线路，默认为**default**。
+
+参见：
+<props="china">[解析线路枚举](https://help.aliyun.com/document_detail/29807.html)。</props>
+
+<props="intl">[解析线路枚举](https://www.alibabacloud.com/help/zh/doc-detail/29807.htm)</props>
+",
+type: "string",
+required: false,
+example: "cn_mobile_anhui"
+}
+},
+{
+name: "Status",
+in: "query",
+schema: {
+description: "解析记录状态。取值：
+
+Enable: 启用解析
+
+Disable: 暂停解析",
+type: "string",
+required: false,
+example: "Enable"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+TotalCount: {
+description: "解析记录总数。",
+type: "integer",
+format: "int64",
+example: "2"
+},
+PageSize: {
+description: "本次查询获取的解析数量。",
+type: "integer",
+format: "int64",
+example: "20"
+},
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "536E9CAD-DB30-4647-AC87-AA5CC38C5382"
+},
+DomainRecords: {
+type: "object",
+itemNode: true,
+properties: {
+Record: {
+description: "解析记录列表。",
+type: "array",
+items: {
+type: "object",
+properties: {
+Status: {
+description: "当前的解析记录状态。",
+type: "string",
+example: "Enable"
+},
+Type: {
+description: "记录类型。",
+type: "string",
+example: "MX"
+},
+Remark: {
+description: "备注。",
+type: "string",
+example: "备注"
+},
+TTL: {
+description: "缓存时间设置。单位：秒。",
+type: "integer",
+format: "int64",
+example: "600"
+},
+RecordId: {
+description: "解析记录ID。",
+type: "string",
+example: "9*******"
+},
+Priority: {
+description: "mx记录的优先级。",
+type: "integer",
+format: "int64",
+example: "5"
+},
+RR: {
+description: "主机记录。",
+type: "string",
+example: "www"
+},
+DomainName: {
+description: "域名名称。",
+type: "string",
+example: "example.com"
+},
+Weight: {
+description: "负载均衡权重。",
+type: "integer",
+format: "int32",
+example: "2"
+},
+Value: {
+description: "记录值。",
+type: "string",
+example: "mail1.hichina.com"
+},
+Line: {
+description: "解析线路。",
+type: "string",
+example: "default"
+},
+Locked: {
+description: "当前解析记录锁定状态。",
+type: "boolean",
+example: "false"
+},
+CreateTimestamp: {
+description: "创建时间（时间戳）。",
+type: "integer",
+format: "int64",
+example: "1666501957000"
+},
+UpdateTimestamp: {
+description: "更新时间（时间戳）。",
+type: "integer",
+format: "int64",
+example: "1676872961000"
+},
+LbaStatus: {
+description: "是否配置了负载均衡策略。
+* true: 权重
+* false: 轮询",
+type: "boolean",
+example: "true"
+}
+}
+}
+}
+}
+},
+PageNumber: {
+description: "当前页码。",
+type: "integer",
+format: "int64",
+example: "1"
+}
+}
+}
+}
+},
+responseDemo: "[{"errorExample":"","example":"{\n  \"TotalCount\": 2,\n  \"PageSize\": 20,\n  \"RequestId\": \"536E9CAD-DB30-4647-AC87-AA5CC38C5382\",\n  \"DomainRecords\": {\n    \"Record\": [\n      {\n        \"Status\": \"Enable\",\n        \"Type\": \"MX\",\n        \"Remark\": \"备注\",\n        \"TTL\": 600,\n        \"RecordId\": \"9*******\",\n        \"Priority\": 5,\n        \"RR\": \"www\",\n        \"DomainName\": \"example.com\",\n        \"Weight\": 2,\n        \"Value\": \"mail1.hichina.com\",\n        \"Line\": \"default\",\n        \"Locked\": false,\n        \"CreateTimestamp\": 1666501957000,\n        \"UpdateTimestamp\": 1676872961000,\n        \"LbaStatus\": true\n      }\n    ]\n  },\n  \"PageNumber\": 1\n}","type":"json"}]",
+title: "获取解析记录列表",
+description: "- 查询可以指定域名（DomainName）、页码（PageNumber）和每页的数量（PageSize）来获取域名的解析列表。
+- 查询可以指定解析记录的主机记录关键字（RRKeyWord）、解析类型关键字（TypeKeyWord）或者记录值的关键字（ValueKeyWord）来查询含有该关键字的解析列表。
+- 解析列表的默认排序方式是按照解析添加的时间从新到旧排序的。
+- 可以指定域名分组的ID（GroupId），全部域名代表所有域名、默认分组代表未设置分组的域名。"
+}
