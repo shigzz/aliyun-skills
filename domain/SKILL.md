@@ -2,8 +2,8 @@
 name: aliyun-domain-skill
 description: >-
   通过 Python 调用阿里云 OpenAPI：（1）域名注册/查询侧：QueryDomainList、CheckDomain（alibabacloud_domain20180129）；
-  （2）云解析 DNS 侧：DescribeDomainRecords、UpdateDomainRecord（alibabacloud_alidns20150109）。
-  适用于「列出账号域名」「查可注册性与价格」「查/改 DNS 解析记录」「按 RecordId 更新 A/CNAME 等」场景；DNS 与域名列表/可注册性为不同产品面，可按需组合。
+  （2）云解析 DNS 侧：DescribeDomainRecords、AddDomainRecord、UpdateDomainRecord（alibabacloud_alidns20150109）。
+  适用于「列出账号域名」「查可注册性与价格」「查/增/改 DNS 解析记录」「新增 A/CNAME 等」「按 RecordId 更新记录」场景；DNS 与域名列表/可注册性为不同产品面，可按需组合。
   API 契约见 reference/ 下 YML；示例见 scripts/；依赖见 scripts/requirements.txt。
 ---
 
@@ -20,11 +20,13 @@ aliyun-domain-skills/
 │   ├── check_domain.yml
 │   ├── query_domainlist.yml
 │   ├── describe_domain_records.yml
+│   ├── add_domain_record.yml
 │   └── update_domain_record.yml
 └── scripts/                      # 可执行脚本与依赖清单
     ├── check_domain.py
     ├── query_domainlist.py
     ├── describe_domain_records.py
+    ├── add_domain_record.py
     ├── update_domain_record.py
     └── requirements.txt
 ```
@@ -40,12 +42,13 @@ aliyun-domain-skills/
 | **查询域名列表** | QueryDomainList | Domain / domain20180129 | 查询账号下的域名列表 | 列出账号域名、检查域名资产、筛选即将到期的域名 |
 | **检查域名可注册性** | CheckDomain | Domain / domain20180129 | 检查域名是否可注册及价格 | 域名注册前检查、批量域名可用性评估 |
 | **列出解析记录** | DescribeDomainRecords | Alidns / alidns20150109 | 按主域名分页查询解析记录 | 排查解析、获取 RecordId |
+| **添加解析记录** | AddDomainRecord | Alidns / alidns20150109 | 在主域名下新增一条解析记录 | 新上线子域、新增 A/CNAME 等 |
 | **修改解析记录** | UpdateDomainRecord | Alidns / alidns20150109 | 按 RecordId 更新 RR、类型、记录值等 | 切流量、改 IP、调整 TTL/线路 |
 
 **重要说明**：
-- **Domain** 与 **Alidns** 为不同产品与 SDK；QueryDomainList / CheckDomain 与 DescribeDomainRecords / UpdateDomainRecord 之间无强制调用顺序，可按业务组合。
+- **Domain** 与 **Alidns** 为不同产品与 SDK；QueryDomainList / CheckDomain 与 DescribeDomainRecords / AddDomainRecord / UpdateDomainRecord 之间无强制调用顺序，可按业务组合。
 - QueryDomainList 与 CheckDomain 彼此独立；若需「先列域名再查价格」，可自行组合（例如先 QueryDomainList，再 CheckDomain，`fee_command=renew`）。
-- **UpdateDomainRecord 为写操作**：通常需先通过 DescribeDomainRecords（或控制台/其他途径）取得目标记录的 **RecordId**，修改前请确认影响范围。
+- **AddDomainRecord、UpdateDomainRecord 为写操作**：新增前建议用 DescribeDomainRecords 确认是否已存在同 RR+Type+线路，避免重复；更新前通常需先取得目标记录的 **RecordId**；执行前请确认影响范围。
 
 ---
 
@@ -570,6 +573,63 @@ pip install -r aliyun-domain-skills/scripts/requirements.txt
 
 ---
 
+# 添加解析记录（AddDomainRecord）
+
+通过同一 SDK `alibabacloud_alidns20150109` 调用 **AddDomainRecord**，在指定**主域名**下**新增**一条解析记录（与 UpdateDomainRecord 不同：无需已有 RecordId，由接口返回新 RecordId）。
+
+## 前置检查与依赖
+
+与上文「列出解析记录（DescribeDomainRecords）」一节相同。写操作前请确认 **DomainName**、**RR**、**Type**、**Value** 正确，避免与已有记录冲突或误指生产流量。
+
+## AddDomainRecord 用法
+
+### 请求参数（摘要）
+
+**必填**
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| DomainName | string | 主域名，如 `example.com`（可通过 DescribeDomains 等获取） |
+| RR | string | 主机记录；解析主域名本身填 `@`，不要留空 |
+| Type | string | 记录类型，如 `A`、`CNAME`、`MX` 等 |
+| Value | string | 记录值 |
+
+**常用可选**
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| TTL | integer | 生效时间（秒），默认 600，范围 1–86400 |
+| Priority | integer | MX 优先级（MX 记录时常必填），范围见 YML |
+| Line | string | 解析线路，默认 `default` |
+| Lang / UserClientIp | string | 语言、客户端 IP |
+
+完整参数与响应见 [reference/add_domain_record.yml](reference/add_domain_record.yml)。
+
+### 响应要点
+
+- 成功时返回 **RequestId** 与新建记录的 **RecordId**（后续可用 **UpdateDomainRecord** 按该 ID 修改）。
+
+### 与 DescribeDomainRecords 的配合
+
+1. 可选：对主域名调用 **DescribeDomainRecords**，确认不存在冲突的 RR + Type + 线路组合。
+2. 构建 **AddDomainRecordRequest**，设置 DomainName、RR、Type、Value 及可选 TTL/Line 等。
+3. 调用 **add_domain_record_with_options**，保存返回的 **RecordId** 供后续运维或更新使用。
+
+### 核心流程
+
+1. 配置 AK/SK
+2. 创建 `Alidns20150109Client`（endpoint：`alidns.aliyuncs.com`）
+3. 构建 `AddDomainRecordRequest`，设置必填与可选参数
+4. 调用 `add_domain_record_with_options`
+
+示例代码参考：[scripts/add_domain_record.py](scripts/add_domain_record.py)
+
+### 错误处理建议
+
+- 同 DescribeDomainRecords；写操作失败时注意是否因记录已存在、域名未在解析中、权限不足或参数不合法。
+
+---
+
 # 修改解析记录（UpdateDomainRecord）
 
 通过同一 SDK `alibabacloud_alidns20150109` 调用 **UpdateDomainRecord**，按 **RecordId** 修改已有解析记录（主机记录、类型、记录值、TTL、线路等）。
@@ -628,7 +688,7 @@ pip install -r aliyun-domain-skills/scripts/requirements.txt
 
 ## 能力扩展
 
-本 skill 已包含 **Domain**（QueryDomainList、CheckDomain）与 **Alidns**（DescribeDomainRecords、UpdateDomainRecord）的契约与示例脚本。后续仍可继续追加其它独立 API（例如域名详情、注册任务、更多 DNS 操作等），建议仍以「reference YML + scripts 示例 + 能力表一行」的方式扩展。
+本 skill 已包含 **Domain**（QueryDomainList、CheckDomain）与 **Alidns**（DescribeDomainRecords、AddDomainRecord、UpdateDomainRecord）的契约与示例脚本。后续仍可继续追加其它独立 API（例如域名详情、注册任务、更多 DNS 操作等），建议仍以「reference YML + scripts 示例 + 能力表一行」的方式扩展。
 
 所有能力均遵循「独立调用、按需组合」的原则。
 

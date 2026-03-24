@@ -1,0 +1,183 @@
+AddDomainRecord: {
+summary: "根据传入参数添加解析记录。",
+methods: [
+"post",
+"get"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+},
+{
+BearerToken: [ ]
+}
+],
+operationType: "readAndWrite",
+deprecated: false,
+systemTags: {
+operationType: "create",
+riskType: "none",
+chargeType: "free",
+abilityTreeNodes: [
+"FEATUREdnsKT3CVU"
+]
+},
+parameters: [
+{
+name: "Lang",
+in: "query",
+schema: {
+description: "设置请求和接收消息的语言类型，取值：
+- **zh**：中文
+- **en**：英文
+默认为**zh**",
+type: "string",
+required: false,
+example: "en"
+}
+},
+{
+name: "UserClientIp",
+in: "query",
+schema: {
+description: "用户端IP。",
+type: "string",
+required: false,
+example: "192.0.2.1"
+}
+},
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "域名名称。<props="china">可通过调用[DescribeDomains](https://help.aliyun.com/zh/dns/api-alidns-2015-01-09-describedomains?spm=a2c4g.11186623.help-menu-search-29697.d_0)获取</props>
+<props="intl">可通过调用[DescribeDomains](https://www.alibabacloud.com/help/zh/dns/api-alidns-2015-01-09-describedomains?spm=a2c63.p38356.help-menu-search-29697.d_0)获取</props>",
+type: "string",
+required: true,
+docRequired: true,
+example: "example.com"
+}
+},
+{
+name: "RR",
+in: "query",
+schema: {
+description: "主机记录。
+
+如果要解析exmaple.com，主机记录要填写”@”，而不是空。",
+type: "string",
+required: true,
+docRequired: true,
+example: "www"
+}
+},
+{
+name: "Type",
+in: "query",
+schema: {
+description: "解析记录类型，参见：
+
+
+<props="china">[解析记录类型格式](https://help.aliyun.com/document_detail/29805.html)</props>
+
+
+<props="intl">[解析记录类型格式](https://www.alibabacloud.com/help/zh/doc-detail/29805.htm)</props>",
+type: "string",
+required: true,
+docRequired: true,
+example: "A"
+}
+},
+{
+name: "Value",
+in: "query",
+schema: {
+description: "记录值。",
+type: "string",
+required: true,
+docRequired: true,
+example: "192.168.0.1"
+}
+},
+{
+name: "TTL",
+in: "query",
+schema: {
+description: "解析生效时间，默认为600秒（10分钟）。参见：
+
+<props="china">[TTL定义说明](https://help.aliyun.com/document_detail/29806.html)</props>
+
+<props="intl">[TTL定义说明](https://www.alibabacloud.com/help/zh/doc-detail/29806.htm)</props>",
+type: "integer",
+format: "int64",
+required: false,
+maximum: "86400",
+minimum: "1",
+example: "600",
+default: "600"
+}
+},
+{
+name: "Priority",
+in: "query",
+schema: {
+description: "MX记录的优先级，取值范围：`[1,50]`。
+
+记录类型为MX记录时，此参数必需，MX 优先级的数值越低，优先级别就越高。",
+type: "integer",
+format: "int64",
+required: false,
+maximum: "65535",
+minimum: "0",
+example: "1"
+}
+},
+{
+name: "Line",
+in: "query",
+schema: {
+description: "解析线路，默认为**default**。参见：
+
+<props="china">[解析线路枚举](https://help.aliyun.com/document_detail/29807.html)</props>
+
+<props="intl">[解析线路枚举](https://www.alibabacloud.com/help/zh/doc-detail/29807.htm)</props>",
+type: "string",
+required: false,
+example: "default",
+default: "default"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "536E9CAD-DB30-4647-AC87-AA5CC38C5382"
+},
+RecordId: {
+description: "解析记录的ID。",
+type: "string",
+example: "999******"
+}
+}
+}
+}
+},
+eventInfo: {
+enable: false,
+eventNames: [ ]
+},
+responseDemo: "[{"errorExample":"","example":"{\n  \"RequestId\": \"536E9CAD-DB30-4647-AC87-AA5CC38C5382\",\n  \"RecordId\": \"999******\"\n}","type":"json"}]",
+title: "添加解析记录",
+requestParamsDescription: " ",
+responseParamsDescription: " ",
+extraInfo: " "
+}
