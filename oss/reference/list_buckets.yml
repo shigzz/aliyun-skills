@@ -1,0 +1,214 @@
+ListBuckets: {
+summary: "列举请求者拥有的所有存储空间（Bucket）。",
+path: "/",
+methods: [
+"get"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+consumes: [
+"application/xml"
+],
+produces: [
+"application/xml"
+],
+operationType: "read",
+deprecated: false,
+systemTags: {
+operationType: "list",
+riskType: "none",
+chargeType: "free",
+abilityTreeCode: "9318",
+abilityTreeNodes: [
+"FEATUREossTOZXHW"
+],
+autoTest: true,
+tenantRelevance: "publicInformation"
+},
+parameters: [
+{
+name: "prefix",
+in: "query",
+schema: {
+title: "限定返回的 Bucket 名称必须以 prefix 作为前缀。如果不设定，则不过滤前缀信息。",
+description: "限定返回的Bucket名称必须以prefix作为前缀。如果不设定，则不过滤前缀信息。
+默认值：无",
+type: "string",
+required: false,
+example: "my"
+}
+},
+{
+name: "marker",
+in: "query",
+schema: {
+title: "设定结果从 marker 之后按字母排序的第一个开始返回。如果不设定，则从头开始返回数据。",
+description: "设定结果从marker之后按字母排序的第一个开始返回。如果不设定，则从头开始返回数据。
+默认值：无",
+type: "string",
+required: false,
+example: "mybucket10"
+}
+},
+{
+name: "max-keys",
+in: "query",
+schema: {
+title: "限定此次返回 Bucket 的最大个数。",
+description: "限定此次返回Bucket的最大个数。
+取值范围：1~1000
+默认值：100",
+type: "integer",
+format: "int64",
+required: false,
+example: "100"
+}
+},
+{
+name: "x-oss-resource-group-id",
+in: "header",
+schema: {
+title: "指定资源组 ID。
+
+如果在请求中携带该请求头并指定资源组 ID，则 OSS 会返回属于该资源组的所有 Bucket。当指定的资源组 ID 为 rg-default-id 时，OSS 会返回属于默认资源组的所有 Bucket。
+如果在请求中携带了该请求头但未指定资源组 ID，则 OSS 会返回属于默认资源组的所有 Bucket。
+如果在请求中未携带该请求头，则 OSS 会返回请求者拥有的所有 Bucket。您可以通过资源管理的控制台或 ListResourceGroups 接口获取资源组 ID。
+",
+description: "Bucket所属资源组Id",
+required: false,
+$ref: "#/components/schemas/ResourceGroupId"
+}
+},
+{
+name: "tag-key",
+in: "query",
+schema: {
+title: "指定Bucket标签键。列举结果中仅会包含那些打上了对应标签的Bucket。",
+description: "指定Bucket标签键。列举结果中仅会包含那些打上了对应标签的Bucket。",
+type: "string",
+required: false,
+example: "test-key"
+}
+},
+{
+name: "tag-value",
+in: "query",
+schema: {
+title: "指定Bucket标签值。如果请求指定了该参数，那么必须同时指定tag-value，列举结果中仅会包含那些打上了对应标签键值对的Bucket。",
+description: "指定Bucket标签值。如果请求指定了该参数，那么必须同时指定tag-value，列举结果中仅会包含那些打上了对应标签键值对的Bucket。",
+type: "string",
+required: false,
+example: "test-value"
+}
+},
+{
+name: "tagging",
+in: "query",
+schema: {
+title: "指定标签列表。如："k1":"v1","k2":"v2"，只有Bucket匹配列表中所有的标签键值对，才会出现在列举结果中。
+tagging参数与tag-key和tag-value两个参数不能同时存在。",
+description: "指定标签列表。如："k1":"v1","k2":"v2"，只有Bucket匹配列表中所有的标签键值对，才会出现在列举结果中。
+tagging参数与tag-key和tag-value两个参数不能同时存在。",
+type: "string",
+required: false,
+example: ""test-key":"test-value""
+}
+}
+],
+responses: {
+200: {
+schema: {
+title: "接口响应体。",
+description: "ListBuckets（GetService）接口的响应体。",
+type: "object",
+properties: {
+ListAllMyBucketsResult: {
+title: "保存存储空间列表的容器。",
+description: "保存ListBuckets（GetService）请求结果的容器。",
+type: "object",
+properties: {
+Owner: {
+title: "保存 Bucket 拥有者信息的容器。",
+description: "保存Bucket拥有者信息的容器。",
+$ref: "#/components/schemas/Owner"
+},
+Prefix: {
+title: "本次查询结果的前缀。",
+description: "本次查询结果的前缀。",
+type: "string",
+example: "logs/"
+},
+Marker: {
+title: "本次 ListBuckets（GetSerivce）的起点。",
+description: "本次ListBuckets（GetSerivce）的起点。",
+type: "string",
+example: "abc"
+},
+MaxKeys: {
+title: "响应请求内返回结果的最大数。",
+description: "响应请求内返回结果的最大数。",
+type: "integer",
+format: "int64",
+example: "20"
+},
+IsTruncated: {
+title: "是否所有的结果都已经返回。取值范围如下：
+
+true：表示本次没有返回全部结果。
+false：表示本次已经返回了全部结果。",
+description: "是否所有的结果都已经返回。取值范围如下：
+- true：表示本次没有返回全部结果。
+- false：表示本次已经返回了全部结果。",
+type: "boolean",
+enumValueTitles: {
+true: "本次没有返回全部结果",
+false: "本次已经返回全部结果"
+},
+example: "true"
+},
+NextMarker: {
+title: "用于继续查询时给 marker 赋值。表示下一次 ListBuckets（GetService）可以以此为 marker，将未返回的结果返回。",
+description: "用于继续查询时给marker赋值。表示下一次ListBuckets（GetService）可以以此为marker，将未返回的结果返回。",
+type: "string",
+example: "def"
+},
+Buckets: {
+title: "保存 Bucket 信息列表的容器。",
+description: "保存Bucket信息列表的容器。",
+type: "object",
+properties: {
+Bucket: {
+title: "保存多个 Bucket 信息的列表。",
+description: "保存多个Bucket信息的列表。",
+type: "array",
+items: {
+title: "保存 Bucket 信息的容器。",
+description: "保存Bucket信息的容器。",
+$ref: "#/components/schemas/Bucket"
+}
+}
+}
+}
+}
+}
+}
+}
+},
+5xx: { }
+},
+staticInfo: {
+returnType: "synchronous"
+},
+responseDemo: "[{"errorExample":"","example":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ListAllMyBucketsResult>\n  <Owner>\n    <ID/>\n    <DisplayName/>\n  </Owner>\n  <Prefix>logs/</Prefix>\n  <Marker>abc</Marker>\n  <MaxKeys>20</MaxKeys>\n  <IsTruncated>true</IsTruncated>\n  <NextMarker>def</NextMarker>\n  <Buckets>\n    <Bucket>\n      <CreationDate/>\n      <ExtranetEndpoint/>\n      <IntranetEndpoint/>\n      <Location/>\n      <Name/>\n      <Region/>\n    </Bucket>\n  </Buckets>\n</ListAllMyBucketsResult>","type":"xml"}]",
+title: "列举存储空间",
+description: "- 您也可以通过设置prefix、marker或者max-keys参数列举满足指定条件的存储空间。
+- 要列举存储空间，您必须有oss:GetService (ListBuckets)权限。具体操作，请参见[为RAM用户授权自定义的权限策略](https://help.aliyun.com/document_detail/199058.htm?spm=a2c4g.11186623.0.0.48be7590hCA8LI#section-ucu-jv0-zip)。
+- 调用接口时，如果所有Bucket已返回，则返回参数的XML中不包含Prefix、Marker、MaxKeys、IsTruncated和NextMarker响应元素。"
+}

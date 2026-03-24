@@ -1,0 +1,150 @@
+PutBucket: {
+summary: "创建一个存储空间（Bucket）。",
+path: "/",
+methods: [
+"put"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+consumes: [
+"application/xml"
+],
+produces: [
+"application/xml"
+],
+operationType: "write",
+systemTags: {
+operationType: "create",
+riskType: "none",
+chargeType: "free",
+abilityTreeCode: "9062",
+abilityTreeNodes: [
+"FEATUREossAI8VDR",
+"FEATUREoss4HN0W2"
+],
+autoTest: true,
+tenantRelevance: "publicInformation"
+},
+parameters: [
+{
+name: "bucket",
+in: "host",
+schema: {
+title: "Bucket 名称。存储空间的命名规范如下：
+
+只能包括小写字母、数字和短划线（-）。
+必须以小写字母或者数字开头和结尾。
+长度必须在 3~63 字符之间。",
+description: "Bucket名称。存储空间的命名规范如下：
+
+- 只能包括小写字母、数字和短划线（-）。
+- 必须以小写字母或者数字开头和结尾。
+- 长度必须在3~63字符之间。",
+type: "string",
+required: true,
+example: "examplebucket"
+}
+},
+{
+name: "x-oss-acl",
+in: "header",
+schema: {
+title: "Bucket 的访问权限 ACL。取值范围如下：
+
+public-read-write：公共读写
+public-read：公共读
+private（默认）：私有",
+description: "指定Bucket的访问权限ACL。包含如下三种访问权限：
+
+- public-read-write：公共读写
+
+- public-read：公共读
+
+- private：私有（默认值）
+
+关于Bucket访问权限ACL的更多信息，请参见[设置存储空间访问权限ACL](~~31843~~)。",
+required: false,
+enumValueTitles: { },
+$ref: "#/components/schemas/BucketACL"
+}
+},
+{
+name: "x-oss-resource-group-id",
+in: "header",
+schema: {
+title: "指定资源组 ID。
+
+如果在请求中携带该请求头并指定资源组 ID，则 OSS 会返回属于该资源组的所有 Bucket。当指定的资源组 ID 为 rg-default-id 时，OSS 会返回属于默认资源组的所有 Bucket。
+如果在请求中携带了该请求头但未指定资源组 ID，则 OSS 会返回属于默认资源组的所有 Bucket。
+如果在请求中未携带该请求头，则 OSS 会返回请求者拥有的所有 Bucket。您可以通过资源管理的控制台或 ListResourceGroups 接口获取资源组 ID。",
+description: "指定资源组ID。
+- 如果在请求中携带该请求头并指定资源组ID，则创建的存储空间属于该资源组。当指定的资源组ID为rg-default-id时，创建的存储空间属于默认资源组。
+- 如果在请求中未携带该请求头，则创建的存储空间属于默认资源组。
+
+您可以通过资源管理的控制台或ListResourceGroups接口获取资源组ID。具体操作，请分别参见[查看资源组基本信息](~~151181~~)和[ListResourceGroups](~~158855~~)。
+> 创建无地域属性Bucket时不支持配置资源组。",
+required: false,
+$ref: "#/components/schemas/ResourceGroupId"
+}
+},
+{
+name: "x-oss-bucket-tagging",
+in: "header",
+schema: {
+title: "指定Bucket标签，如 k1=v1&k2=v2。",
+description: "指定Bucket标签，如 k1=v1&k2=v2。",
+type: "string",
+required: false,
+example: "k1=v1&k2=v2"
+}
+},
+{
+name: "body",
+in: "body",
+style: "xml",
+schema: {
+title: "接口请求体",
+description: "存储创建Bucket信息的容器。",
+type: "object",
+properties: {
+CreateBucketConfiguration: {
+title: "存储创建 Bucket 信息的容器。",
+description: "创建Bucket时使用的配置信息。",
+required: false,
+$ref: "#/components/schemas/CreateBucketConfiguration"
+}
+},
+required: false
+}
+}
+],
+responses: {
+200: { },
+5XX: { }
+},
+staticInfo: {
+returnType: "synchronous"
+},
+responseDemo: "[{"type":"xml","example":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<root/>","errorExample":""},{"type":"xml","example":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<root/>","errorExample":""}]",
+title: "创建存储空间",
+description: "- 同一阿里云账号在同一地域（Region）内最多支持创建100个Bucket。
+- 每个地域都有对应的访问域名（Endpoint）。关于地域与访问域名对应关系的更多信息，请参见[访问域名和数据中心](~~31837~~)。",
+extraInfo: "此接口所对应的各语言SDK如下：
+- Java
+- Python
+- PHP
+- Go
+- C
+- .NET
+- Android
+- iOS
+- Node.js
+- Ruby"
+}

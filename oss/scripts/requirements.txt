@@ -1,0 +1,3 @@
+alibabacloud_oss_v2>=1.0.0
+python-dotenv>=1.0.0
+
