@@ -46,6 +46,14 @@ from dotenv import load_dotenv
 load_dotenv()
 ```
 
+**方式三：让 Agent 协助配置**
+
+如果环境变量和 `.env` 文件都未配置，**Agent 应主动向用户提问**获取凭证信息：
+
+1. Agent 向用户发送请求："未检测到阿里云凭证，请提供 AccessKey ID 和 AccessKey Secret"
+2. 用户回复后，Agent 将凭证设置到环境变量或写入 `.env` 文件
+3. Agent 继续后续操作
+
 > 凭证检查未通过时，**不要继续执行后续步骤**，先让用户完成配置。
 
 ## 安装依赖

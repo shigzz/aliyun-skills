@@ -7,21 +7,31 @@
 ```
 .
 ├── billing/                          # 账单相关 Skills
-│   ├── aliyun-instance-bill/         # 实例账单查询 Skill
-│   │   ├── SKILL.md                  # Skill 使用文档
-│   │   ├── requirements.txt          # Python 依赖
-│   │   └── reference/                # 参考代码
-│   │       └── describe_instance_bill.py
-│   └── .claude/skills/aliyun-billing/# Claude Code Skill 格式
-│       ├── skill.json                # Skill 定义文件
-│       ├── main.py                   # 主程序入口
-│       └── requirements.txt          # 依赖配置
-└── .env.example                      # 环境变量模板
+│   └── aliyun-instance-bill/         # 实例账单查询 Skill
+│       ├── SKILL.md                  # Skill 使用文档
+│       ├── requirements.txt          # Python 依赖
+│       ├── .env.example              # 环境变量模板
+│       └── reference/                # 参考代码
+│           └── describe_instance_bill.py
+├── domain/                           # 域名相关 Skills
+│   └── aliyun-domain-list/           # 域名列表查询 Skill
+│       ├── SKILL.md                  # Skill 使用文档
+│       ├── requirements.txt          # Python 依赖
+│       ├── .env.example              # 环境变量模板
+│       └── reference/                # 参考代码
+│           └── query_domainlist.py
+└── log/                              # 日志服务相关 Skills
+    ├── SKILL.md                      # SLS 日志查询 Skill 文档
+    └── reference/                    # 参考代码
+        ├── list_logstores.py
+        ├── list_logstores.yml
+        ├── get_logs_v2.py
+        └── get_logs_v2.yml
 ```
 
 ## 已包含 Skills
 
-### 1. 阿里云实例账单查询 (aliyun-billing)
+### 1. 阿里云实例账单查询 (billing/aliyun-instance-bill)
 
 通过阿里云 BSS OpenAPI 查询实例级账单信息。
 
@@ -42,14 +52,75 @@
 - 按产品/按天统计费用
 - 实例级成本追踪
 
+---
+
+### 2. 阿里云域名列表查询 (domain/aliyun-domain-list)
+
+通过阿里云 Domain OpenAPI 查询当前账号下的域名列表。
+
+**功能特性：**
+- 查询账号下所有域名
+- 支持按域名名称搜索
+- 支持按到期时间筛选（即将到期域名）
+- 支持按注册时间筛选
+- 支持按域名状态筛选（急需续费/赎回）
+- 支持按资源组、标签筛选
+- 支持排序（注册时间/到期时间）
+
+**核心 API：**
+- `QueryDomainList` - 查询域名列表
+
+**使用场景：**
+- 域名资产管理
+- 查询即将到期的域名
+- 按条件筛选域名
+- 域名信息核对
+
+---
+
+### 3. 阿里云 SLS 日志查询 (log/)
+
+通过阿里云 SLS (Simple Log Service) API 查询日志。
+
+**功能特性：**
+- 列出指定 Project 下的所有 LogStore
+- 查询指定 LogStore 中的日志
+- 支持 SLS 查询语句（搜索和 SQL 分析）
+- 支持时间范围查询
+- 支持分页查询
+- 支持 scan 模式查询大量数据
+
+**核心 API：**
+- `ListLogStores` - 列出日志库
+- `GetLogsV2` - 查询日志（V2 版本）
+
+**使用场景：**
+- 查询应用日志
+- 日志分析和排查问题
+- 列出可用日志库
+- 统计日志数据
+
 ## 快速开始
 
 ### 1. 配置阿里云访问凭据
 
-复制环境变量模板并填写你的 AK/SK：
+所有 Skill 都需要配置阿里云 AccessKey。支持以下方式：
+
+**方式一：环境变量（推荐）**
 
 ```bash
-cp billing/.env.example billing/.env
+export ALIBABA_CLOUD_ACCESS_KEY_ID="your-access-key-id"
+export ALIBABA_CLOUD_ACCESS_KEY_SECRET="your-access-key-secret"
+```
+
+**方式二：项目 .env 文件**
+
+在对应 Skill 目录创建 `.env` 文件：
+
+```bash
+cp billing/aliyun-instance-bill/.env.example billing/aliyun-instance-bill/.env
+# 或
+cp domain/aliyun-domain-list/.env.example domain/aliyun-domain-list/.env
 ```
 
 编辑 `.env` 文件：
@@ -61,17 +132,7 @@ ALIBABA_CLOUD_ACCESS_KEY_SECRET=your_access_key_secret
 
 获取阿里云访问密钥：[阿里云文档](https://help.aliyun.com/document_detail/53045.html)
 
-### 2. 安装依赖
-
-```bash
-# 进入对应的 Skill 目录
-cd billing/aliyun-instance-bill
-
-# 安装依赖
-pip install -r requirements.txt
-```
-
-### 3. 使用 Skill
+### 2. 使用 Skill
 
 #### 方式一：作为 Claude Code Skill 使用
 
@@ -79,39 +140,40 @@ pip install -r requirements.txt
 
 ```
 查询我 2024 年 3 月的阿里云账单
+列出我账号下的所有域名
+查询 SLS 日志 project 为 my-project 的日志
 ```
 
 #### 方式二：直接运行 Python 脚本
 
+各 Skill 目录下的 `reference/` 文件夹包含可运行的示例代码：
+
+**账单查询：**
 ```bash
-cd billing/.claude/skills/aliyun-billing
-
-# 查询指定账期账单
-python main.py --billing-cycle 2024-03
-
-# 查询指定产品（如 ECS）的后付费账单
-python main.py --billing-cycle 2024-03 --product-code ecs --subscription-type PayAsYouGo
-
-# 按天查询特定日期的账单
-python main.py --billing-cycle 2024-03 --granularity DAILY --billing-date 2024-03-01
-
-# 按计费项维度查询，限制最多查询 5 页
-python main.py --billing-cycle 2024-03 --is-billing-item true --max-pages 5
+cd billing/aliyun-instance-bill/reference
+python describe_instance_bill.py
 ```
 
-### 4. 参数说明
+**域名查询：**
+```bash
+cd domain/aliyun-domain-list/reference
+python query_domainlist.py
+```
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `--billing-cycle` | string | 是 | 账期，格式 YYYY-MM，如 `2024-03` |
-| `--product-code` | string | 否 | 产品代码，如 `ecs`、`rds`、`oss` |
-| `--subscription-type` | string | 否 | 订阅类型：`Subscription`(预付费) / `PayAsYouGo`(后付费) |
-| `--is-billing-item` | boolean | 否 | 是否按计费项维度，默认 `false` |
-| `--granularity` | string | 否 | 查询粒度：`MONTHLY`(月) / `DAILY`(日) |
-| `--billing-date` | string | 否 | 账单日期，格式 YYYY-MM-DD，Granularity=DAILY 时必填 |
-| `--page-size` | integer | 否 | 每页数量，默认 100，最大 300 |
-| `--max-pages` | integer | 否 | 最大查询页数，默认 0 表示查询所有 |
-| `--is-hide-zero-charge` | boolean | 否 | 是否隐藏零费用账单，默认 `false` |
+**日志查询：**
+```bash
+cd log/reference
+python list_logstores.py
+python get_logs_v2.py
+```
+
+## 各 Skill 详细文档
+
+| Skill | 文档 | 说明 |
+|-------|------|------|
+| 实例账单查询 | [billing/aliyun-instance-bill/SKILL.md](billing/aliyun-instance-bill/SKILL.md) | BSS 账单 API 使用文档 |
+| 域名列表查询 | [domain/aliyun-domain-list/SKILL.md](domain/aliyun-domain-list/SKILL.md) | Domain API 使用文档 |
+| SLS 日志查询 | [log/SKILL.md](log/SKILL.md) | SLS 日志服务 API 使用文档 |
 
 ## 开发指南
 
@@ -125,14 +187,23 @@ python main.py --billing-cycle 2024-03 --is-billing-item true --max-pages 5
    - 参数说明
    - 示例代码
 3. 在 `reference/` 目录添加参考代码
-4. （可选）在 `.claude/skills/` 创建 Claude Code Skill 格式文件
+4. 创建 `.env.example` 环境变量模板
 
 ### 依赖管理
 
 每个 Skill 应包含自己的 `requirements.txt`，列出所需的阿里云 SDK：
 
 ```
+# 账单查询依赖
 alibabacloud_bssopenapi20171214>=1.0.0
+
+# 域名查询依赖
+alibabacloud_domain20180129>=1.0.0
+
+# 日志查询依赖
+alibabacloud_sls20201230>=1.0.0
+
+# 通用依赖
 alibabacloud_credentials>=1.0.0
 alibabacloud_tea_openapi>=1.0.0
 alibabacloud_tea_util>=1.0.0
@@ -151,6 +222,8 @@ python-dotenv>=1.0.0
 - [阿里云 API 门户](https://api.aliyun.com/)
 - [阿里云 SDK 文档](https://help.aliyun.com/document_detail/53090.html)
 - [BSS OpenAPI 文档](https://help.aliyun.com/document_detail/100392.html)
+- [Domain OpenAPI 文档](https://help.aliyun.com/document_detail/42875.html)
+- [SLS OpenAPI 文档](https://help.aliyun.com/document_detail/29007.html)
 
 ## 许可证
 
