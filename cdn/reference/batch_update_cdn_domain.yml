@@ -1,0 +1,162 @@
+BatchUpdateCdnDomain: {
+summary: "调用BatchUpdateCdnDomain批量更新加速域名基本信息。",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "write",
+systemTags: {
+operationType: "update",
+abilityTreeCode: "111688",
+abilityTreeNodes: [
+"FEATUREcdnFGPKCB",
+"FEATUREcdn9UE6OO"
+]
+},
+parameters: [
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "加速域名，多个域名用半角逗号（,）隔开。",
+type: "string",
+required: true,
+example: "example.com,example.org"
+}
+},
+{
+name: "Sources",
+in: "query",
+schema: {
+description: "回源地址列表。
+
+> 不支持同时传入**Sources**和**TopLevelDomain**参数，如果您同时传入**Sources**和**TopLevelDomain**参数，**TopLevelDomain**将不生效。",
+type: "string",
+required: false,
+example: "[{"content":"10.10.10.10","type":"ipaddr","priority":"20","port":80,"weight":"15"}]"
+}
+},
+{
+name: "ResourceGroupId",
+in: "query",
+schema: {
+description: "资源组ID。",
+type: "string",
+required: false,
+example: "rg-acfmyuji4b6r4**"
+}
+},
+{
+name: "TopLevelDomain",
+in: "query",
+schema: {
+description: "顶级接入域。
+
+> 不支持同时传入**Sources**和**TopLevelDomain**参数，如果您同时传入**Sources**和**TopLevelDomain**参数，**TopLevelDomain**将不生效。",
+type: "string",
+required: false,
+example: "example.com"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "15C66C7B-671A-4297-9187-2C4477247A74"
+}
+}
+}
+}
+},
+errorCodes: {
+400: [
+{
+errorCode: "MissingDomainName",
+errorMessage: "The domainName parameter is required."
+},
+{
+errorCode: "InvalidDomainName.Malformed",
+errorMessage: "The specified DomainName is invalid."
+},
+{
+errorCode: "InvalidSource.Content.Malformed",
+errorMessage: "The specified Source Content is invalid."
+},
+{
+errorCode: "InvalidTypeContent.Mismatch",
+errorMessage: "The specified source type does not match the specified source content."
+},
+{
+errorCode: "MissingSource.Content",
+errorMessage: "The Source Content must be specified."
+},
+{
+errorCode: "MissingSource.Type",
+errorMessage: "The Source Type must be specified."
+},
+{
+errorCode: "InvalidSources.Malformed",
+errorMessage: "Specified Sources is malformed."
+},
+{
+errorCode: "InvalidSource.Type.Malformed",
+errorMessage: "The specified Source Type is invalid."
+},
+{
+errorCode: "InvalidSource.Priority.Malformed",
+errorMessage: "The specified Source Priority is invalid."
+},
+{
+errorCode: "InvalidResourceGroupId.Malformed",
+errorMessage: "The specified ResourceGroupId is invalid."
+},
+{
+errorCode: "EntityNotExists.ResourceGroup",
+errorMessage: "The resource group does not exist."
+},
+{
+errorCode: "EntityNotExist.ResourceGroup",
+errorMessage: "The resource group does not exist."
+},
+{
+errorCode: "InvalidStatus.ResourceGroup",
+errorMessage: "It is not allowed to do this operation because of the current status of resource-group."
+}
+],
+403: [
+{
+errorCode: "DomainInProtectedMode",
+errorMessage: "The domain is in protection mode. To request permission, contact Customer Service."
+}
+]
+},
+responseDemo: "[{"type":"json","example":"{\n  \"RequestId\": \"15C66C7B-671A-4297-9187-2C4477247A74\"\n}","errorExample":""},{"type":"xml","example":"<BatchUpdateCdnDomainResponse>\t\r\n    <RequestId>15C66C7B-671A-4297-9187-2C4477247A74</RequestId>\r\n</BatchUpdateCdnDomainResponse>\t","errorExample":""}]",
+title: "批量更新域名",
+description: "- 单用户调用频率：30次/秒。
+- 支持批量查询域名，多个域名用半角逗号（,）分隔，一次最多支持更新50个域名。",
+requestParamsDescription: "Sources各字段含义如下所示。
+
+| 参数       | 类型   | 是否必选 | 描述                                                                                                                                                                   |
+|------------|--------|-------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| type | String | 是    | 源站类型。<br>ipaddr：IP源站。<br>domain：域名源站。<br>oss：OSS Bucket为源站。<br>fc_domain：函数计算源站。 |
+| content | String | 是    | 回源地址，可以是IP或域名。 |
+| port| Integer| 否     | 端口。您可以指定80、443，也可以自定义端口，默认值为80。443端口支持HTTPS协议回源。 |
+| priority     | String | 否    | 源站地址对应的优先级，支持20和30，默认值为20。20是主源，30是备源。|
+| weight     | String | 否    | 回源权重，100以内，默认值为10。|",
+responseParamsDescription: " ",
+extraInfo: " "
+}

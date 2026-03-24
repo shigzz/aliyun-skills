@@ -1,0 +1,122 @@
+DescribeDomainCname: {
+summary: "调用接口对加速域名 Cname 进行解析检测，查看解析结果判断是否完成Cname配置。",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "read",
+systemTags: {
+operationType: "get",
+abilityTreeCode: "111769",
+abilityTreeNodes: [
+"FEATUREcdn9UE6OO"
+],
+tenantRelevance: "publicInformation"
+},
+parameters: [
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "需要查询的加速域名，多个用逗号（,）分隔。参数不可为空",
+type: "string",
+required: true,
+example: "example.com,example.org"
+}
+}
+],
+responses: {
+200: {
+schema: {
+description: "检测结果",
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID",
+type: "string",
+example: "06D29681-B7CD-4034-A8CC-28AFFA213539"
+},
+CnameDatas: {
+type: "object",
+itemNode: true,
+properties: {
+Data: {
+description: "Cname检测结果数组。",
+type: "array",
+items: {
+description: "Cname信息",
+type: "object",
+properties: {
+Status: {
+description: "Cname检查结果。取值：
+
+- 0 表示通过域名解析检测到分配给域名的cname。
+- 1 表示通过域名解析暂未监测到分配给域名的cname。
+- -1 表示通过域名解析检测到分配给域名的cname超时",
+type: "integer",
+format: "int32",
+enumValueTitles: {
+0: "0",
+1: "1",
+-1: "-1"
+},
+example: "0"
+},
+Domain: {
+description: "输入参数中的加速域名。",
+type: "string",
+example: "a.com"
+},
+Cname: {
+description: "阿里云CDN分配给域名的Cname",
+type: "string",
+example: "a.com.w.alikunlun.net"
+},
+Passed: {
+description: "通过域名解析检测到分配给域名的cname是否通过，取值：
+- true: 通过
+- false: 不通过
+- timeout: 超时",
+type: "string",
+example: "true"
+},
+ErrMsg: {
+description: "通过域名解析检测到分配给域名的cname不通过或超时的错误信息。",
+type: "string",
+example: "timeout"
+}
+}
+}
+}
+}
+}
+}
+}
+}
+},
+errorCodes: {
+400: [
+{
+errorCode: "DomainNameOverLimit",
+errorMessage: "A maximum of 30 domains are supported for each request."
+}
+],
+403: [
+{
+errorCode: "InvaildParameter",
+errorMessage: "The parameter you provided is invalid."
+}
+]
+},
+responseDemo: "[{"errorExample":"","example":"{\n  \"RequestId\": \"06D29681-B7CD-4034-A8CC-28AFFA213539\",\n  \"CnameDatas\": {\n    \"Data\": [\n      {\n        \"Status\": 0,\n        \"Domain\": \"a.com\",\n        \"Cname\": \"a.com.w.alikunlun.net\",\n        \"Passed\": \"true\",\n        \"ErrMsg\": \"timeout\"\n      }\n    ]\n  }\n}","type":"json"}]",
+title: "检测加速域名的Cname是否完成配置"
+}

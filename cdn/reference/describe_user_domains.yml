@@ -1,0 +1,432 @@
+DescribeUserDomains: {
+summary: "调用DescribeUserDomains查询用户名下所有的域名与状态，支持域名模糊匹配过滤和域名状态过滤。",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "read",
+systemTags: {
+operationType: "get",
+abilityTreeCode: "111842",
+abilityTreeNodes: [
+"FEATUREcdnFGPKCB"
+]
+},
+parameters: [
+{
+name: "PageSize",
+in: "query",
+schema: {
+description: "分页大小，取值**1~500**，默认值为**20**，最大值为**500**。",
+type: "integer",
+format: "int32",
+required: false,
+maximum: "500",
+example: "5",
+default: "20"
+}
+},
+{
+name: "PageNumber",
+in: "query",
+schema: {
+description: "取得第几页，取值范围：**1**~**100000**。
+",
+type: "integer",
+format: "int32",
+required: false,
+example: "1",
+default: "1"
+}
+},
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "加速域名。如果不传该参数，默认不做域名匹配搜索，返回所有符合条件的域名。",
+type: "string",
+required: false,
+example: "example.com",
+maxLength: 6800
+}
+},
+{
+name: "DomainStatus",
+in: "query",
+schema: {
+description: "域名状态过滤。取值：
+- **online**：启用。
+- **offline**：停用。
+- **configuring**：配置中。
+- **configure_failed**：配置失败。
+- **checking**：正在审核。
+- **check_failed**：审核失败。
+- **stopping**：停用中。
+- **deleting**：删除中。
+
+如果不传该参数，默认查询所有状态。",
+type: "string",
+required: false,
+example: "configure_failed"
+}
+},
+{
+name: "DomainSearchType",
+in: "query",
+schema: {
+description: "域名查询类型。取值：
+- **fuzzy_match**：模糊匹配。
+- **pre_match**：前匹配。
+- **suf_match**：后匹配。
+- **full_match**（默认值）：完全匹配。
+
+> 传递了域名参数的情况下，不传DomainSearchType参数，则默认采用完全匹配模式。",
+type: "string",
+required: false,
+example: "fuzzy_match"
+}
+},
+{
+name: "CdnType",
+in: "query",
+schema: {
+description: "CDN业务类型，多个用半角逗号（,）分隔。取值：
+- **web**：图片小文件。
+- **download**：大文件下载。
+- **video**：视音频点播。
+
+如果不传该参数，默认查询所有业务类型。",
+type: "string",
+required: false,
+example: "download,web,video"
+}
+},
+{
+name: "CheckDomainShow",
+in: "query",
+schema: {
+description: "是否展示审核中、审核失败、配置失败的域名。取值：
+- **true**：是。
+- **false**：否。",
+type: "boolean",
+required: false,
+example: "false"
+}
+},
+{
+name: "ResourceGroupId",
+in: "query",
+schema: {
+description: "资源组ID，默认查询所有资源组ID。",
+type: "string",
+required: false,
+example: "abcd1234abcd1234"
+}
+},
+{
+name: "ChangeStartTime",
+in: "query",
+schema: {
+description: "更新开始时间，使用UTC+0时间表示，格式为yyyy-MM-ddTHH:mm:ssZ。",
+type: "string",
+required: false,
+example: "2019-10-10T12:14:55Z"
+}
+},
+{
+name: "ChangeEndTime",
+in: "query",
+schema: {
+description: "更新结束时间，使用UTC+0时间表示，格式为yyyy-MM-ddTHH:mm:ssZ。
+
+> 结束时间需晚于起始时间。",
+type: "string",
+required: false,
+example: "2019-10-10T12:14:58Z"
+}
+},
+{
+name: "Coverage",
+in: "query",
+schema: {
+description: "加速区域，默认为全部区域。取值：
+- **domestic**：仅中国内地。
+- **global**：全球。
+- **overseas**：全球（不包含中国内地）。",
+type: "string",
+required: false,
+example: "domestic"
+}
+},
+{
+name: "Source",
+in: "query",
+schema: {
+description: "源站信息。",
+type: "string",
+required: false,
+example: "***"
+}
+},
+{
+name: "Tag",
+in: "query",
+style: "repeatList",
+schema: {
+description: "标签列表。列表元素最大数量：20。",
+type: "array",
+items: {
+description: "标签解释。",
+type: "object",
+properties: {
+Key: {
+description: "标签键。
+
+默认查询所有标签键。",
+type: "string",
+required: false,
+example: "key"
+},
+Value: {
+description: "标签值。
+
+默认查询所有标签值。",
+type: "string",
+required: false,
+example: "value"
+}
+},
+required: false
+},
+required: false,
+maxItems: 20
+}
+}
+],
+responses: {
+200: {
+schema: {
+description: "参数解释。",
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "BDA62CE4-3477-439A-B52E-D2D7C829D7C1"
+},
+PageNumber: {
+description: "返回数据的页码。",
+type: "integer",
+format: "int64",
+example: "1"
+},
+PageSize: {
+description: "整页大小。",
+type: "integer",
+format: "int64",
+example: "20"
+},
+TotalCount: {
+description: "总条数。",
+type: "integer",
+format: "int64",
+example: "2"
+},
+Domains: {
+type: "object",
+itemNode: true,
+properties: {
+PageData: {
+description: "域名信息。",
+type: "array",
+items: {
+description: "域名信息。",
+type: "object",
+properties: {
+SslProtocol: {
+description: "HTTPS开关。取值：
+
+- **on**：已开启。
+- **off**：未开启。",
+type: "string",
+example: "on"
+},
+Sandbox: {
+description: "是否在沙箱。取值：
+
+- **true**：是
+- **空字符串**：否",
+type: "string",
+example: "true"
+},
+GmtModified: {
+description: "加速域名修改时间。",
+type: "string",
+example: "2015-10-28T11:05:52Z"
+},
+DomainName: {
+description: "加速域名。",
+type: "string",
+example: "example.com"
+},
+DomainId: {
+description: "加速域名ID。",
+type: "integer",
+format: "int64",
+example: "11223344"
+},
+GmtCreated: {
+description: "加速域名创建时间。",
+type: "string",
+example: "2015-10-28T09:32:51Z"
+},
+Description: {
+description: "域名备案信息的描述。",
+type: "string",
+example: "filing description"
+},
+Coverage: {
+description: "加速区域。取值：
+- **domestic**：仅中国内地。
+- **global**：全球。
+- **overseas**：全球（不包含中国内地）。",
+type: "string",
+example: "domestic"
+},
+ResourceGroupId: {
+description: "资源组ID。",
+type: "string",
+example: "abcd1234abcd1234"
+},
+Cname: {
+description: "加速域名对应的CNAME。",
+type: "string",
+example: "example.com.w.alikunlun.net"
+},
+DomainStatus: {
+description: "加速域名状态。取值：
+- **online**：启用。
+- **offline**：停用。
+- **configuring**：配置中。
+- **configure_failed**：配置失败。
+- **checking**：正在审核。
+- **check_failed**：审核失败。
+- **stopping**：停用中。
+- **deleting**：删除中。",
+type: "string",
+example: "configure_failed"
+},
+CdnType: {
+description: "加速业务类型。取值：
+
+- **web**：图片小文件。
+- **download**：大文件下载。
+- **video**：视音频点播。
+",
+type: "string",
+example: "download"
+},
+Sources: {
+type: "object",
+itemNode: true,
+properties: {
+Source: {
+description: "数据类型Source。",
+type: "array",
+items: {
+description: "数据类型Source。",
+type: "object",
+properties: {
+Type: {
+description: "源站类型。",
+type: "string",
+example: "oss"
+},
+Weight: {
+description: "回源权重。",
+type: "string",
+example: "15"
+},
+Priority: {
+description: "优先级。",
+type: "string",
+example: "20"
+},
+Port: {
+description: "源站端口。",
+type: "integer",
+format: "int32",
+example: "80"
+},
+Content: {
+description: "源站地址。",
+type: "string",
+example: "***.oss-cn-hangzhou.aliyuncs.com"
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+},
+errorCodes: {
+400: [
+{
+errorCode: "InvalidPageNumber.ValueNotSupported",
+errorMessage: "The specified value of PageNumber is not supported."
+},
+{
+errorCode: "InvalidPageSize.ValueNotSupported",
+errorMessage: "The specified value of PageSize is invalid."
+},
+{
+errorCode: "InvalidDomainStatus.ValueNotSupported",
+errorMessage: "The specified value of DomainStatus is invalid."
+},
+{
+errorCode: "InvalidDomainName.Malformed",
+errorMessage: "The specified DomainName is invalid."
+},
+{
+errorCode: "InvalidDomainSearchType.ValueNotSupported",
+errorMessage: "The specified value of DomainSearchType is invalid."
+},
+{
+errorCode: "InvalidChangeStartTime.Malformed",
+errorMessage: "The specified ChangeStartTime is invalid."
+},
+{
+errorCode: "InvalidChangeEndTime.Malformed",
+errorMessage: "The specified ChangeEndTime is invalid."
+},
+{
+errorCode: "InvalidCdnType.Malformed",
+errorMessage: "The specified CdnType is invalid."
+}
+]
+},
+responseDemo: "[{"type":"json","example":"{\n  \"RequestId\": \"BDA62CE4-3477-439A-B52E-D2D7C829D7C1\",\n  \"PageNumber\": 1,\n  \"PageSize\": 20,\n  \"TotalCount\": 2,\n  \"Domains\": {\n    \"PageData\": [\n      {\n        \"SslProtocol\": \"on\",\n        \"Sandbox\": \"true\",\n        \"GmtModified\": \"2015-10-28T11:05:52Z\",\n        \"DomainName\": \"example.com\",\n        \"DomainId\": 11223344,\n        \"GmtCreated\": \"2015-10-28T09:32:51Z\",\n        \"Description\": \"filing description\",\n        \"Coverage\": \"domestic\",\n        \"ResourceGroupId\": \"abcd1234abcd1234\",\n        \"Cname\": \"example.com.w.alikunlun.net\",\n        \"DomainStatus\": \"configure_failed\",\n        \"CdnType\": \"download\",\n        \"Sources\": {\n          \"Source\": [\n            {\n              \"Type\": \"oss\",\n              \"Weight\": \"15\",\n              \"Priority\": \"20\",\n              \"Port\": 80,\n              \"Content\": \"***.oss-cn-hangzhou.aliyuncs.com\"\n            }\n          ]\n        }\n      }\n    ]\n  }\n}","errorExample":""},{"type":"xml","example":"<DescribeUserDomainsResponse>\n    <RequestId>BDA62CE4-3477-439A-B52E-D2D7C829D7C1</RequestId>\n    <PageNumber>1</PageNumber>\n    <PageSize>20</PageSize>\n    <TotalCount>2</TotalCount>\n    <Domains>\n        <SslProtocol>on</SslProtocol>\n        <Sandbox>normal</Sandbox>\n        <GmtModified>2015-10-28T11:05:52Z</GmtModified>\n        <DomainName>example.com</DomainName>\n        <DomainId>11223344</DomainId>\n        <GmtCreated>2015-10-28T09:32:51Z</GmtCreated>\n        <Description>filing description</Description>\n        <Coverage>domestic</Coverage>\n        <ResourceGroupId>abcd1234abcd1234</ResourceGroupId>\n        <Cname>example.com.w.alikunlun.net</Cname>\n        <DomainStatus>configure_failed</DomainStatus>\n        <CdnType>download</CdnType>\n        <Sources>\n            <Type>oss</Type>\n            <Weight>15</Weight>\n            <Priority>20</Priority>\n            <Port>80</Port>\n            <Content>***.oss-cn-hangzhou.aliyuncs.com</Content>\n        </Sources>\n    </Domains>\n</DescribeUserDomainsResponse>","errorExample":""}]",
+title: "查询用户域名",
+description: "- 单用户调用频率：100次/秒。
+- 支持批量查询域名，多个域名用半角逗号（,）分隔，一次最多支持50个域名查询。",
+requestParamsDescription: " ",
+responseParamsDescription: " ",
+extraInfo: " "
+}

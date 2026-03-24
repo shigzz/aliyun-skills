@@ -1,0 +1,74 @@
+StartCdnDomain: {
+summary: "调用StartCdnDomain启用状态为停用的加速域名，将DomainStatus变更为Online。",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "write",
+systemTags: {
+operationType: "update",
+abilityTreeCode: "111916",
+abilityTreeNodes: [
+"FEATUREcdnFGPKCB",
+"FEATUREcdn9UE6OO"
+]
+},
+parameters: [
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "加速域名，仅支持启用单个。",
+type: "string",
+required: true,
+example: "example.com"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "16A96B9A-F203-4EC5-8E43-CB92E68F4CD8"
+}
+}
+}
+}
+},
+errorCodes: {
+400: [
+{
+errorCode: "RecordCheckNotAvailable",
+errorMessage: "The ICP filing interface is unavailable. Please try again later."
+},
+{
+errorCode: "IcpBlack",
+errorMessage: "The domain is on the ICP blacklist."
+},
+{
+errorCode: "IspBlack",
+errorMessage: "The domain is on the ISP blacklist."
+}
+]
+},
+responseDemo: "[{"type":"json","example":"{\n  \"RequestId\": \"16A96B9A-F203-4EC5-8E43-CB92E68F4CD8\"\n}","errorExample":"{\"RequestId\":\"16A96B9A-F203-4EC5-8E43-CB92E68F4CD8\",\"HostId\":\"cdn.aliyuncs.com\",\"Code\":\"InternalError\",\"Message\":\"The request processing has failed due to some unknown error.\"}"},{"type":"xml","example":"<StartCdnDomainResponse>\r\n\t<RequestId>0AEDAF20-4DDF-4165-8750-47FF9C1929C9</RequestId>\r\n</StartCdnDomainResponse>\r\n\t\r\n","errorExample":""}]",
+title: "启用域名",
+description: "- 如果域名处于非法状态或域名对应账户欠费，您将无法正常调用该接口启用加速域名。
+- 单用户调用频率：100次/秒。",
+requestParamsDescription: " ",
+responseParamsDescription: " ",
+extraInfo: " "
+}

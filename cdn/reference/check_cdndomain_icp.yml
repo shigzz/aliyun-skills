@@ -1,0 +1,85 @@
+CheckCdnDomainICP: {
+summary: "调用CheckCdnDomainICP查询域名是否备案。",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "read",
+deprecated: false,
+systemTags: {
+operationType: "none",
+abilityTreeCode: "174446",
+abilityTreeNodes: [
+"FEATUREcdnRLQ471"
+]
+},
+parameters: [
+{
+name: "DomainName",
+in: "query",
+schema: {
+title: "A short description of struct",
+description: "域名。",
+type: "string",
+required: true,
+example: "example.com"
+}
+}
+],
+responses: {
+200: {
+schema: {
+title: "Schema of Response",
+description: "Schema of Response",
+type: "object",
+properties: {
+RequestId: {
+title: "Id of the request",
+description: "请求ID。",
+type: "string",
+example: "16A96B9A-F203-4EC5-8E43-CB92E68F4CD8"
+},
+Status: {
+description: "资源包状态。取值：
+
+- **DomainIsRegistration**：已备案。
+
+- **DomainNotRegistration**：未备案。",
+type: "string",
+enumValueTitles: {
+DomainNotRegistration: "未备案",
+DomainIsRegistration: "已备案"
+},
+example: "DomainIsRegistration"
+}
+}
+}
+}
+},
+errorCodes: {
+400: [
+{
+errorCode: "-124",
+errorMessage: "The domain provided does not belong to you."
+},
+{
+errorCode: "CheckDomainICPFail",
+errorMessage: "The domain query icp info error,check domain icp failed."
+}
+]
+},
+staticInfo: {
+returnType: "synchronous"
+},
+responseDemo: "[{"errorExample":"","example":"{\n  \"RequestId\": \"16A96B9A-F203-4EC5-8E43-CB92E68F4CD8\",\n  \"Status\": \"DomainIsRegistration\"\n}","type":"json"}]",
+title: "查询域名是否备案"
+}

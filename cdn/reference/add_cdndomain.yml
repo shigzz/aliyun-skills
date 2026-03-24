@@ -1,0 +1,376 @@
+AddCdnDomain: {
+summary: "调用AddCdnDomain添加加速域名。",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "write",
+systemTags: {
+operationType: "create",
+abilityTreeCode: "111676",
+abilityTreeNodes: [
+"FEATUREcdnFGPKCB"
+],
+tenantRelevance: "publicInformation"
+},
+parameters: [
+{
+name: "CdnType",
+in: "query",
+schema: {
+description: "加速域名的业务类型。取值：
+
+- **web**：图片小文件。
+- **download**：大文件下载。
+- **video**：视音频点播。",
+type: "string",
+required: true,
+enumValueTitles: {
+download: "大文件下载",
+web: "图片小文件",
+video: "音视频点播"
+},
+example: "web",
+enum: [
+"unitcell",
+"web",
+"download",
+"liveStream",
+"video",
+"app",
+"mixed_download"
+]
+}
+},
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "需要接入CDN的加速域名。
+
+支持泛域名，以英文句号（.）开头，例如.example.com。",
+type: "string",
+required: true,
+example: ".example.com"
+}
+},
+{
+name: "ResourceGroupId",
+in: "query",
+schema: {
+description: "资源组ID。
+
+不传该参数时，系统自动补全为默认资源组ID。",
+type: "string",
+required: false,
+example: "rg-acfmyuji4b6r4**"
+}
+},
+{
+name: "Sources",
+in: "query",
+schema: {
+description: "回源地址列表。",
+type: "string",
+required: true,
+example: "[
+      {
+            "content": "192.0.2.0",
+            "type": "ipaddr",
+            "priority": "20",
+            "port": 80,
+            "weight": "15"
+      }
+]"
+}
+},
+{
+name: "CheckUrl",
+in: "query",
+schema: {
+description: "健康检测URL。",
+type: "string",
+required: false,
+example: "www.example.com/test.html"
+}
+},
+{
+name: "Scope",
+in: "query",
+schema: {
+description: "加速区域。取值：
+
+- **domestic**（默认值）：仅中国内地。
+
+- **overseas**：全球（不包含中国内地）。
+
+- **global**：全球。",
+type: "string",
+required: false,
+example: "domestic"
+}
+},
+{
+name: "TopLevelDomain",
+in: "query",
+schema: {
+description: "顶级接入域。",
+type: "string",
+required: false,
+example: "example.com"
+}
+},
+{
+name: "Tag",
+in: "query",
+style: "repeatList",
+schema: {
+description: "标签信息列表。最大可填入20个标签信息。",
+type: "array",
+items: {
+type: "object",
+properties: {
+Key: {
+description: "标签键。",
+type: "string",
+required: false,
+example: "env"
+},
+Value: {
+description: "标签值。",
+type: "string",
+required: false,
+example: "value"
+}
+},
+required: false
+},
+required: false,
+maxItems: 21,
+minItems: 1
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "15C66C7B-671A-4297-9187-2C4477247A74"
+}
+}
+}
+}
+},
+errorCodes: {
+400: [
+{
+errorCode: "InvalidDomainName.Malformed",
+errorMessage: "Specified DomainName is malformed."
+},
+{
+errorCode: "MissingParameter",
+errorMessage: "The input parameter cdnType that is mandatory for processing this request is not supplied."
+},
+{
+errorCode: "InvalidCdnType.Malformed",
+errorMessage: "Specified CdnType is malformed."
+},
+{
+errorCode: "InvalidSources.Malformed",
+errorMessage: "Specified Sources is malformed."
+},
+{
+errorCode: "InvalidSourceType.Malformed",
+errorMessage: "Specified CdnType is malformed."
+},
+{
+errorCode: "InvalidSource.Priority.Malformed",
+errorMessage: "The specified Source Priority is invalid."
+},
+{
+errorCode: "InvalidTypeAndContent.MissMatch",
+errorMessage: "The specified source type does not match the specified source content."
+},
+{
+errorCode: "InvalidScope.Malformed",
+errorMessage: "Specified Scope is malformed."
+},
+{
+errorCode: "SourceIp.Exceed",
+errorMessage: "The Certificate you provided is malformed"
+},
+{
+errorCode: "InvalidCertificate",
+errorMessage: "The Certificate you provided is malformed"
+},
+{
+errorCode: "InvalidCertificate.TooLong",
+errorMessage: "The Certificate you provided is over the max length"
+},
+{
+errorCode: "InnerAddDomainDenied",
+errorMessage: "Your account has not bind aoneId, can not add domain."
+},
+{
+errorCode: "CheckSourceHealthFailed",
+errorMessage: "sources ip or source domain check health failed,please input right source."
+},
+{
+errorCode: "ExtensiveAndAllBothExist",
+errorMessage: "Extensive domain and the domain begins with all. can not exist at the same time."
+},
+{
+errorCode: "CdnTypeNotSupportExtensiveDomain",
+errorMessage: "Extensive domain not supported for this cdn type."
+},
+{
+errorCode: "ExtensiveAndSpecificDomainConflict",
+errorMessage: "The number of wildcard domain names exceeds the limit."
+},
+{
+errorCode: "InvalidResourceGroupId.Malformed",
+errorMessage: "Specified ResourceGroupId is malformed."
+},
+{
+errorCode: "DomainReserved",
+errorMessage: "The root domain of your domain is reserved by another account. Submit a ticket to contact customer support."
+},
+{
+errorCode: "InvalidDomainNameLevel",
+errorMessage: "Domain name suffixed with alicdn.com only support third level."
+},
+{
+errorCode: "InvalidTopLevelDomain.Malformed",
+errorMessage: "Specified TopLevelDomain is malformed."
+},
+{
+errorCode: "TopLevelDomain.NotFound",
+errorMessage: "TopLevelDomain is not exist."
+},
+{
+errorCode: "EntityNotExists.ResourceGroup",
+errorMessage: "The resource group does not exist."
+},
+{
+errorCode: "EntityNotExist.ResourceGroup",
+errorMessage: "The resource group does not exist."
+},
+{
+errorCode: "InvalidStatus.ResourceGroup",
+errorMessage: "It is not allowed to do this operation because of the current status of resource-group."
+},
+{
+errorCode: "NotInternationRealIdentity",
+errorMessage: "You need to do real name authentication when you use Chinese mainland resources."
+},
+{
+errorCode: "Abs.CheckUrl.Malformed",
+errorMessage: "The CheckUrl you provided is malformed."
+},
+{
+errorCode: "RecordCheckNotAvailable",
+errorMessage: "The ICP filing interface is unavailable. Please try again later."
+},
+{
+errorCode: "IcpBlack",
+errorMessage: "The domain is on the ICP blacklist."
+},
+{
+errorCode: "IspBlack",
+errorMessage: "The domain is on the ISP blacklist."
+},
+{
+errorCode: "DomainOwnerVerifyFail",
+errorMessage: "Owner verification of the root domain failed."
+},
+{
+errorCode: "TopLevelDomain.Mismatch",
+errorMessage: "The specified TopLevelDomain does not match webSiteType."
+},
+{
+errorCode: "DomainInBlacklist",
+errorMessage: "The domain is in the blacklist."
+},
+{
+errorCode: "InvalidTagKey",
+errorMessage: "The specified TagKey is invalid."
+},
+{
+errorCode: "InvalidTagValue",
+errorMessage: "The specified TagValue is invalid."
+},
+{
+errorCode: "InvalidTagKey.Repeated",
+errorMessage: "The specified TagKey is duplicated."
+},
+{
+errorCode: "InvalidTag",
+errorMessage: "The specified Tag is Invalid."
+},
+{
+errorCode: "InvalidTagKey.OverLimit",
+errorMessage: "The number of Tag can not over limit 20."
+},
+{
+errorCode: "SourceInBlacklist",
+errorMessage: "Source is in the blacklist."
+},
+{
+errorCode: "ReservedTagKey",
+errorMessage: "The tag key is used internally as a reserved field and is not allowed to be used."
+},
+{
+errorCode: "DomainOverLimit",
+errorMessage: "The maximum number of domains is exceeded."
+},
+{
+errorCode: "DomainInRiskList",
+errorMessage: "The domain you added may be at risk. If you have any questions, please submit a ticket."
+},
+{
+errorCode: "RegionNoResource",
+errorMessage: "Resource allocation failed. Please submit a work order to contact customer service."
+}
+],
+403: [
+{
+errorCode: "AccountException",
+errorMessage: "Account exception. Please open ticket to make an appeal."
+}
+]
+},
+responseDemo: "[{"type":"json","example":"{\n  \"RequestId\": \"15C66C7B-671A-4297-9187-2C4477247A74\"\n}","errorExample":""},{"type":"xml","example":"<AddCdnDomainResponse>\n    <RequestId>15C66C7B-671A-4297-9187-2C4477247A74</RequestId>\n</AddCdnDomainResponse>","errorExample":""}]",
+title: "添加域名",
+description: "- 添加域名之前，您需要先开通CDN服务。具体操作，请参见[开通CDN服务](~~27272~~)。
+- 加速域名必须已成功备案。
+- 每次只能添加一个加速域名，每个用户最多可以添加50个域名。
+- 源站内容如果不在阿里云平台上，需进行审核，审核工作会在下一个工作日前完成。
+- 单个用户的调用频率：30次/秒。
+
+## 注意事项
+- 通过接口添加了域名之后，将会有3～5分钟的域名生效时间，在这段时间内请不要添加任何配置，待域名状态处于online以后再进行下一步的配置。",
+requestParamsDescription: "Sources参数的各字段含义如下表所示。
+
+| 参数       | 类型   | 是否必选 | 描述                                                                                                                                                                   |
+|------------|--------|-------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| type | String | 是    | 源站类型。取值：<br>ipaddr：IP源站。<br>domain：域名源站。<br>oss：OSS Bucket为源站。<br>fc_domain：函数计算为源站。 |
+| content | String | 是    | 回源地址，可以是IP或域名。 |
+| port| Integer| 否     | 端口。<br>您可以指定443或80端口，也可以自定义端口，默认值为80端口。443端口支持HTTPS协议回源。 |
+| priority     | String | 否    | 源站地址对应的优先级。<br>支持20和30，默认值为20。20是主源，30是备源。|
+| weight     | String | 否    | 回源权重，取值范围为100以内，默认值为10。|",
+responseParamsDescription: " ",
+extraInfo: " "
+}

@@ -1,0 +1,209 @@
+DescribeCdnDomainConfigs: {
+summary: "调用DescribeCdnDomainConfigs获取加速域名的配置信息，一次可查询多个功能配置信息。",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "read",
+systemTags: {
+operationType: "get",
+abilityTreeCode: "111727",
+abilityTreeNodes: [
+"FEATUREcdn9UE6OO"
+]
+},
+parameters: [
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "加速域名，仅支持查询单个域名。",
+type: "string",
+required: true,
+example: "example.com"
+}
+},
+{
+name: "FunctionNames",
+in: "query",
+schema: {
+description: "功能函数名称，多个用英文逗号（,）分隔。更多功能名称，请参见[域名配置功能参数](~~388460~~)。",
+type: "string",
+required: false,
+example: "aliauth"
+}
+},
+{
+name: "ConfigId",
+in: "query",
+schema: {
+description: "功能配置ID。ConfigId查询和使用，请参见[ConfigId使用说明](~~388994~~)。",
+type: "string",
+required: false,
+example: "6295"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "C80705BF-0F76-41FA-BAD1-5B59296A4E59"
+},
+DomainConfigs: {
+type: "object",
+itemNode: true,
+properties: {
+DomainConfig: {
+description: "域名配置。",
+type: "array",
+items: {
+type: "object",
+properties: {
+Status: {
+description: "配置状态。取值：
+
+- **success**：成功。
+
+- **testing**：测试中。
+
+- **failed**：失败。
+
+- **configuring**：配置中。",
+type: "string",
+example: "success"
+},
+ParentId: {
+description: "规则条件ID，非必填项。
+
+通过配置[域名配置功能参数](~~388460~~)中的功能函数**condition**（规则引擎），可以创建出规则条件（规则条件可以通过识别用户请求中携带的各种参数来匹配和过滤用户请求），每一个规则条件被创建以后都会生成一个对应的[ConfigId](~~388994~~)，ConfigId可以被当作ParentId参数被其他功能函数引用，这样规则条件就可以与功能配置一起组合形成更灵活的配置。
+
+具体配置操作请参考[批量配置域名](~~90915~~)或下文ParentId配置示例说明。",
+type: "string",
+example: "222728944812032"
+},
+ConfigId: {
+description: "配置ID。",
+type: "string",
+example: "6295"
+},
+FunctionName: {
+description: "功能函数名称。",
+type: "string",
+example: "aliauth"
+},
+FunctionArgs: {
+type: "object",
+itemNode: true,
+properties: {
+FunctionArg: {
+description: "各个功能函数所对应的参数配置。",
+type: "array",
+items: {
+type: "object",
+properties: {
+ArgName: {
+description: "参数名称，**functionName**的配置项（可配置多个配置项）。",
+type: "string",
+example: "auth_type"
+},
+ArgValue: {
+description: "参数值，**functionName**的配置项的取值。",
+type: "string",
+example: "req_auth"
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+},
+errorCodes: {
+400: [
+{
+errorCode: "Invalid%s.ValueNotSupported",
+errorMessage: "FunctionName [%s] is not supported."
+}
+]
+},
+responseDemo: "[{"type":"json","example":"{\n  \"RequestId\": \"C80705BF-0F76-41FA-BAD1-5B59296A4E59\",\n  \"DomainConfigs\": {\n    \"DomainConfig\": [\n      {\n        \"Status\": \"success\",\n        \"ParentId\": \"222728944812032\",\n        \"ConfigId\": \"6295\",\n        \"FunctionName\": \"aliauth\",\n        \"FunctionArgs\": {\n          \"FunctionArg\": [\n            {\n              \"ArgName\": \"auth_type\",\n              \"ArgValue\": \"req_auth\"\n            }\n          ]\n        }\n      }\n    ]\n  }\n}","errorExample":""},{"type":"xml","example":"<DescribeCdnDomainConfigsResponse>\n    <RequestId>C80705BF-0F76-41FA-BAD1-5B59296A4E59</RequestId>\n    <DomainConfigs>\n        <Status>success</Status>\n        <ParentId>222728944812032</ParentId>\n        <ConfigId>6295</ConfigId>\n        <FunctionName>aliauth</FunctionName>\n        <FunctionArgs>\n            <ArgName>auth_type</ArgName>\n            <ArgValue>req_auth</ArgValue>\n        </FunctionArgs>\n    </DomainConfigs>\n</DescribeCdnDomainConfigsResponse>","errorExample":""}]",
+title: "查询域名配置",
+description: "> 单用户调用频率：100次/秒。",
+requestParamsDescription: " ",
+responseParamsDescription: "## ParentId配置示例
+ **parentId**为**-1**：表示删除该配置里面已有的规则条件。
+```[{
+   "functionArgs": [{
+     "argName": "功能参数A", 
+     "argValue": "功能参数A对应的值"
+    }, 
+  {
+    "argName": "功能参数B", 
+    "argValue": "功能参数B对应的值"
+     }], 
+ "functionName": "功能名称",
+ "parentId": "选填项，对应引用规则条件的configid"
+}]
+```
+不使用**parentId**的情况下，配置示例如下：
+使用函数**origin_request_header**添加回源HTTP请求头的时候引用了**configid=222728944812032**的规则条件，请求参数如下：
+```[{
+        "functionArgs": [{
+            "argName": "header_operation_type",
+            "argValue": "add"
+        }, {
+            "argName": "header_name",
+            "argValue": "Accept-Encoding"
+        }, {
+            "argName": "header_value",
+            "argValue": "gzip"
+        }, {
+            "argName": "duplicate",
+            "argValue": "off"
+        }],
+        "functionName": "origin_request_header"
+}]
+```
+使用**parentId**的情况下，配置示例如下：
+使用函数**origin_request_header**添加回源HTTP请求头的时候引用了**configid=222728944812032**的规则条件，请求参数如下：
+```[{
+        "functionArgs": [{
+            "argName": "header_operation_type",
+            "argValue": "add"
+        }, {
+            "argName": "header_name",
+            "argValue": "Accept-Encoding"
+        }, {
+            "argName": "header_value",
+            "argValue": "gzip"
+        }, {
+            "argName": "duplicate",
+            "argValue": "off"
+        }],
+        "functionName": "origin_request_header",
+        "parentId": "222728944812032"
+}]
+```",
+extraInfo: " "
+}

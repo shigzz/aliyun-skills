@@ -1,0 +1,285 @@
+SetCdnDomainSSLCertificate: {
+summary: "调用SetCdnDomainSSLCertificate用于设置某域名下证书功能是否启用及更新证书信息。",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "write",
+systemTags: {
+operationType: "update",
+riskType: "none",
+chargeType: "free",
+abilityTreeCode: "168241",
+abilityTreeNodes: [
+"FEATUREcdn4R6KLH"
+]
+},
+parameters: [
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "指定证书所属加速域名，需属于HTTPS加速类型。仅支持单个域名。",
+type: "string",
+required: true,
+example: "example.com
+"
+}
+},
+{
+name: "CertName",
+in: "query",
+schema: {
+description: "证书名称，目前只支持单个证书名称。
+CertType=upload时选填，给新证书的名称。",
+type: "string",
+required: false,
+example: "yourCertName
+"
+}
+},
+{
+name: "CertId",
+in: "query",
+schema: {
+description: "证书ID。
+CertType=cas时必填，表示选择已有证书。",
+type: "integer",
+format: "int64",
+required: false,
+example: "8089870
+"
+}
+},
+{
+name: "CertType",
+in: "query",
+schema: {
+description: "证书类型。
+
+- **upload**：上传证书。
+- **cas**：证书中心证书。",
+type: "string",
+required: false,
+example: "upload",
+enum: [
+"cas",
+"upload"
+]
+}
+},
+{
+name: "SSLProtocol",
+in: "query",
+schema: {
+description: "HTTPS证书是否启用。
+
+- **on**：启用。
+- **off**：不启用。",
+type: "string",
+required: true,
+example: "off"
+}
+},
+{
+name: "SSLPub",
+in: "query",
+schema: {
+description: "安全证书内容，不启用证书则无需输入，配置证书请输入证书内容。",
+type: "string",
+required: false,
+example: "xxx
+"
+}
+},
+{
+name: "SSLPri",
+in: "query",
+schema: {
+description: "私钥内容，不启用证书则无需输入，配置证书请输入私钥内容。",
+type: "string",
+required: false,
+example: "y****
+"
+}
+},
+{
+name: "CertRegion",
+in: "query",
+schema: {
+description: "证书所在地域，只有**CertType=cas**时生效。支持**cn-hangzhou**和**ap-southeast-1**，默认**cn-hangzhou**。国际站用户建议使用**ap-southeast-1**。",
+type: "string",
+required: false,
+enumValueTitles: {
+ap-southeast-1: "ap-southeast-1",
+cn-hangzhou: "cn-hangzhou"
+},
+example: "cn-hangzhou"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "A7C69682-7F88-40DD-A198-10D0309E439D
+"
+}
+}
+}
+}
+},
+errorCodes: {
+400: [
+{
+errorCode: "InvalidSSLProtocol.ValueNotSupported",
+errorMessage: "The specified SSLProtocol is invalid."
+},
+{
+errorCode: "SSLPub.MissingParameter",
+errorMessage: "The SSLPub parameter is required."
+},
+{
+errorCode: "SSLPri.MissingParameter",
+errorMessage: "The SSLPri parameter is required."
+},
+{
+errorCode: "InvalidSSLPub",
+errorMessage: "The specified SSLPub is invalid."
+},
+{
+errorCode: "InvalidSSLPri",
+errorMessage: "The specified SSLPri is invalid."
+},
+{
+errorCode: "Certificate.MissMatch",
+errorMessage: "The SSLPri does not match the certificate."
+},
+{
+errorCode: "InvalidCertificate.TooLong",
+errorMessage: "The maximum length of the certificate is exceeded."
+},
+{
+errorCode: "InvalidCertName.TooLong",
+errorMessage: "The length of the certificate name cannot exceed 128 characters."
+},
+{
+errorCode: "AuthenticationFailed",
+errorMessage: "Error performing verification."
+},
+{
+errorCode: "SetDomainCertificate.ParameterError",
+errorMessage: "The specified parameters are invalid."
+},
+{
+errorCode: "Certificate.StatusError",
+errorMessage: "The status of the certificate is invalid."
+},
+{
+errorCode: "DeleteFailed",
+errorMessage: "Error deleting the certificate."
+},
+{
+errorCode: "Certificate.NotFind",
+errorMessage: "The certificate does not exist."
+},
+{
+errorCode: "Certificate.Duplicated",
+errorMessage: "The certificate name already exists."
+},
+{
+errorCode: "Certificate.FormatError",
+errorMessage: "The format of the certificate is invalid."
+},
+{
+errorCode: "Certificate.KeyNull",
+errorMessage: "The private key is required."
+},
+{
+errorCode: "Key.Malformed",
+errorMessage: "The specified Key format is invalid."
+},
+{
+errorCode: "CertStorage.failed",
+errorMessage: "Error saving the certificate."
+},
+{
+errorCode: "CertificateContent.Duplicated",
+errorMessage: "The certificate has been uploaded; do not upload again."
+},
+{
+errorCode: "Certificate.Expired",
+errorMessage: "The certificate has expired."
+},
+{
+errorCode: "InvalidDomain.notOnline",
+errorMessage: "The domain is offline. Check the status of the domain and try again later."
+},
+{
+errorCode: "Decode.Error",
+errorMessage: "Error decoding the SSLPub or SSLPri certificate."
+},
+{
+errorCode: "sslPub.Error",
+errorMessage: "Error encoding SSLPub."
+},
+{
+errorCode: "sslPri.Error",
+errorMessage: "Error encoding SSLPri."
+},
+{
+errorCode: "DomainInSafeMode",
+errorMessage: "The domain is in safe mode. To request permission, contact Customer Service."
+},
+{
+errorCode: "CreateCertificateFailed",
+errorMessage: "Create certificate failed,please try again."
+},
+{
+errorCode: "Abs.CertRegion.ValueNotSupported",
+errorMessage: "CertRegion is not supported."
+},
+{
+errorCode: "CertNameAlreadyExists",
+errorMessage: "The CertName already exists."
+},
+{
+errorCode: "InvalidDomain.Offline",
+errorMessage: "The domain provided is offline."
+},
+{
+errorCode: "InvalidEnv",
+errorMessage: "The specified Env is invalid."
+}
+],
+403: [
+{
+errorCode: "DomainInProtectedMode",
+errorMessage: "The domain is in protection mode. To request permission, contact Customer Service."
+}
+],
+404: [
+{
+errorCode: "CertName.MissingParameter",
+errorMessage: "You must specify CertName."
+}
+]
+},
+responseDemo: "[{"errorExample":"","example":"{\n  \"RequestId\": \"A7C69682-7F88-40DD-A198-10D0309E439D\\n\"\n}","type":"json"}]",
+title: "设置CDN域名证书",
+description: "- 单用户调用频率：30次/秒。
+- 调用方式：POST。"
+}

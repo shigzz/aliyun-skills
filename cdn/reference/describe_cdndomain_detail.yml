@@ -1,0 +1,184 @@
+DescribeCdnDomainDetail: {
+summary: "调用DescribeCdnDomainDetail查询指定加速域名的基本配置。",
+methods: [
+"get",
+"post"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+operationType: "read",
+systemTags: {
+operationType: "get",
+abilityTreeCode: "111728",
+abilityTreeNodes: [
+"FEATUREcdnFGPKCB"
+]
+},
+parameters: [
+{
+name: "DomainName",
+in: "query",
+schema: {
+description: "加速域名信息，仅支持单个查询。",
+type: "string",
+required: true,
+example: "example.com"
+}
+}
+],
+responses: {
+200: {
+schema: {
+type: "object",
+properties: {
+RequestId: {
+description: "请求ID。",
+type: "string",
+example: "18CF38AA-1275-451D-A12B-4EC0BF1C5E30"
+},
+GetDomainDetailModel: {
+description: "域名详情。",
+type: "object",
+properties: {
+GmtCreated: {
+description: "创建时间。",
+type: "string",
+example: "2015-06-25T03:30:50Z"
+},
+Description: {
+description: "备注。",
+type: "string",
+example: "直播域名"
+},
+HttpsCname: {
+description: "开启HTTPS的CNAME域名。",
+type: "string",
+example: "example.com.w.kunlunle.com"
+},
+ResourceGroupId: {
+description: "资源组ID。",
+type: "string",
+example: "abcd1234abcd1234"
+},
+ServerCertificateStatus: {
+description: "是否开启SSL证书。取值：
+
+- **on**：开启。
+- **off**：关闭。",
+type: "string",
+example: "on"
+},
+Scope: {
+description: "加速区域。",
+type: "string",
+example: "domestic"
+},
+DomainStatus: {
+description: "加速域名运行状态。取值：
+- **online**：启用。
+- **offline**：停用。
+- **configuring**：配置中。
+- **configure_failed**：配置失败。
+- **checking**：正在审核。
+- **check_failed**：审核失败。
+-  **stopping**：停用中。 
+-  **deleting**：删除中。",
+type: "string",
+example: "online"
+},
+Cname: {
+description: "为加速域名生成的一个CNAME域名，需要在域名解析服务商处将加速域名CNAME解析到该域名。",
+type: "string",
+example: "example.com.w.kunlunle.com"
+},
+GmtModified: {
+description: "最近修改时间。",
+type: "string",
+example: "2017-06-25T03:30:50Z"
+},
+CdnType: {
+description: "加速域名的业务类型。取值：
+
+- **web**：图片小文件。
+
+- **download**：大文件下载。
+
+- **video**：视音频点播。",
+type: "string",
+example: "web"
+},
+DomainName: {
+description: "加速的域名。",
+type: "string",
+example: "example.com"
+},
+SourceModels: {
+type: "object",
+itemNode: true,
+properties: {
+SourceModel: {
+description: "源站信息。",
+type: "array",
+items: {
+type: "object",
+properties: {
+Type: {
+description: "源站类型。取值：
+- **ipaddr**：IP源站。
+- **domain**：域名源站。
+- **oss**：OSS Bucket为源站。
+- **fc_domain**：函数计算为源站。",
+type: "string",
+example: "domain"
+},
+Weight: {
+description: "回源权重。",
+type: "string",
+example: "10"
+},
+Enabled: {
+description: "状态。",
+type: "string",
+example: "online"
+},
+Priority: {
+description: "优先级。",
+type: "string",
+example: "20"
+},
+Port: {
+description: "端口，支持443和80。",
+type: "integer",
+format: "int32",
+example: "80"
+},
+Content: {
+description: "回源地址。",
+type: "string",
+example: "example.com"
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+},
+responseDemo: "[{"type":"json","example":"{\n  \"RequestId\": \"18CF38AA-1275-451D-A12B-4EC0BF1C5E30\",\n  \"GetDomainDetailModel\": {\n    \"GmtCreated\": \"2015-06-25T03:30:50Z\",\n    \"Description\": \"直播域名\",\n    \"HttpsCname\": \"example.com.w.kunlunle.com\",\n    \"ResourceGroupId\": \"abcd1234abcd1234\",\n    \"ServerCertificateStatus\": \"on\",\n    \"Scope\": \"domestic\",\n    \"DomainStatus\": \"online\",\n    \"Cname\": \"example.com.w.kunlunle.com\",\n    \"GmtModified\": \"2017-06-25T03:30:50Z\",\n    \"CdnType\": \"web\",\n    \"DomainName\": \"example.com\",\n    \"SourceModels\": {\n      \"SourceModel\": [\n        {\n          \"Type\": \"domain\",\n          \"Weight\": \"10\",\n          \"Enabled\": \"online\",\n          \"Priority\": \"20\",\n          \"Port\": 80,\n          \"Content\": \"example.com\"\n        }\n      ]\n    }\n  }\n}","errorExample":"{\"RequestId\":\"16A96B9A-F203-4EC5-8E43-CB92E68F4CD8\",\"HostId\":\"cdn.aliyuncs.com\",\"Code\":\"InternalError\",\"Message\":\"The request processing has failed due to some unknown error.\"}"},{"type":"xml","example":"<DescribeCdnDomainDetailResponse>\n<GetDomainDetailModel>\n    <CdnType>web</CdnType>\n    <Cname>example.com.w.kunlunle.com</Cname>\n    <DomainName>example.com</DomainName>\n    <DomainStatus>online</DomainStatus>\n    <GmtCreated>2015-06-25T03:30:50Z</GmtCreated>\n    <GmtModified>2015-06-25T03:30:53Z</GmtModified>\n    <HttpsCname>example.com.w.kunlunle.com</HttpsCname>\n    <SourceType>domain</SourceType>\n    <ResourceGroupId>abcd1234abcd1234</ResourceGroupId>\n    <SourceModels>\n        <SourceModel>\n            <Enabled>online</Enabled>\n            <Port>80</Port>\n            <Type>domain</Type>\n            <Content>example.com</Content>\n            <Priority>20</Priority>\n            <Weight>10</Weight>\n        </SourceModel>\n    </SourceModels>\n</GetDomainDetailModel>\n<RequestId>18CF38AA-1275-451D-A12B-4EC0BF1C5E30</RequestId>\n</DescribeCdnDomainDetailResponse>","errorExample":""}]",
+title: "查询域名详情",
+description: "> 单用户调用频率：30次/秒。",
+requestParamsDescription: " ",
+responseParamsDescription: " ",
+extraInfo: " "
+}
