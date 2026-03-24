@@ -6,86 +6,172 @@
 
 ```
 .
-├── billing/                          # 账单相关 Skills
-│   └── aliyun-instance-bill/         # 实例账单查询 Skill
-│       ├── SKILL.md                  # Skill 使用文档
-│       ├── requirements.txt          # Python 依赖
-│       ├── .env.example              # 环境变量模板
-│       └── reference/                # 参考代码
-│           └── describe_instance_bill.py
 ├── domain/                           # 域名相关 Skills
-│   ├── SKILL.md                      # 域名查询 Skill 文档
+│   ├── SKILL.md                      # Skill 使用文档
 │   ├── .env.example                  # 环境变量模板
-│   ├── scripts/                      # Python 脚本
-│   │   ├── query_domainlist.py       # 域名列表查询
-│   │   ├── check_domain.py           # 域名检查
-│   │   └── requirements.txt          # Python 依赖
-│   └── reference/                    # 工作流定义
-│       ├── query_domainlist.yml
-│       └── check_domain.yml
-└── log/                              # 日志服务相关 Skills
-    ├── SKILL.md                      # SLS 日志查询 Skill 文档
-    └── reference/                    # 参考代码
-        ├── list_logstores.py
-        ├── list_logstores.yml
-        ├── get_logs_v2.py
-        └── get_logs_v2.yml
+│   ├── reference/                    # API 定义（YML）
+│   │   ├── check_domain.yml
+│   │   ├── query_domainlist.yml
+│   │   ├── describe_domain_records.yml
+│   │   └── update_domain_record.yml
+│   └── scripts/                      # Python 脚本
+│       ├── check_domain.py
+│       ├── query_domainlist.py
+│       ├── describe_domain_records.py
+│       ├── update_domain_record.py
+│       └── requirements.txt
+├── oss/                              # OSS 对象存储相关 Skills
+│   ├── SKILL.md                      # Skill 使用文档
+│   ├── .env.example                  # 环境变量模板
+│   ├── reference/                    # API 定义（YML）
+│   │   ├── list_buckets.yml
+│   │   ├── put_bucket.yml
+│   │   └── put_object.yml
+│   └── scripts/                      # Python 脚本
+│       ├── oss_util.py
+│       ├── list_buckets.py
+│       ├── put_bucket.py
+│       ├── put_object.py
+│       └── requirements.txt
+├── cdn/                              # CDN 相关 Skills
+│   ├── SKILL.md                      # Skill 使用文档
+│   ├── .env.example                  # 环境变量模板
+│   ├── reference/                    # API 定义（YML）
+│   │   ├── describe_user_domains.yml
+│   │   ├── describe_cdndomain_detail.yml
+│   │   ├── describe_cdndomain_configs.yml
+│   │   ├── describe_domain_cname.yml
+│   │   ├── check_cdndomain_icp.yml
+│   │   ├── add_cdndomain.yml
+│   │   ├── batch_update_cdndomain.yml
+│   │   ├── start_cdndomain.yml
+│   │   └── set_cdndomain_sslcertificate.yml
+│   └── scripts/                      # Python 脚本
+│       ├── describe_user_domains.py
+│       ├── describe_cdndomain_detail.py
+│       ├── describe_cdndomain_configs.py
+│       ├── describe_domain_cname.py
+│       ├── check_cdndomain_icp.py
+│       ├── add_cdndomain.py
+│       ├── batch_update_cdndomain.py
+│       ├── start_cdndomain.py
+│       ├── set_cdndomain_sslcertificate.py
+│       └── requirements.txt
+├── sls/                              # SLS 日志服务相关 Skills
+│   ├── SKILL.md                      # Skill 使用文档
+│   ├── .env.example                  # 环境变量模板
+│   ├── reference/                    # API 定义（YML）
+│   │   ├── list_logstores.yml
+│   │   └── get_log_v2.yml
+│   └── scripts/                      # Python 脚本
+│       ├── sls_util.py
+│       ├── list_logstores.py
+│       ├── get_logs_v2.py
+│       └── requirements.txt
+└── billing/                          # 账单相关 Skills
+    └── aliyun-instance-bill/         # 实例账单查询 Skill
+        ├── SKILL.md                  # Skill 使用文档
+        ├── requirements.txt          # Python 依赖
+        ├── .env.example              # 环境变量模板
+        └── reference/                # 参考代码
+            └── describe_instance_bill.py
 ```
 
 ## 已包含 Skills
 
-### 1. 阿里云实例账单查询 (billing/aliyun-instance-bill)
+### 1. 阿里云域名 (domain/)
 
-通过阿里云 BSS OpenAPI 查询实例级账单信息。
-
-**功能特性：**
-- 支持查询最近 18 个月的账单数据
-- 支持按产品类型筛选（ECS、RDS、OSS 等）
-- 支持按订阅类型筛选（预付费/后付费）
-- 支持月/日两种粒度查询
-- 自动分页获取完整数据
-- 支持实例维度或计费项维度查看
-
-**核心 API：**
-- `DescribeInstanceBill` - 查询实例级账单详情
-
-**使用场景：**
-- 月度费用对账
-- 资源消费分析
-- 按产品/按天统计费用
-- 实例级成本追踪
-
----
-
-### 2. 阿里云域名查询 (domain/)
-
-通过阿里云 Domain OpenAPI 查询当前账号下的域名列表和域名详情。
+通过阿里云 Domain 和 Alidns OpenAPI 查询域名列表、检查域名可注册性、管理 DNS 解析记录。
 
 **功能特性：**
 - 查询账号下所有域名
-- 查询单个域名详细信息
+- 检查域名可注册性及价格
+- 列出 DNS 解析记录
+- 修改 DNS 解析记录（A/CNAME/MX 等）
 - 支持按域名名称搜索
 - 支持按到期时间筛选（即将到期域名）
-- 支持按注册时间筛选
-- 支持按域名状态筛选（急需续费/赎回）
-- 支持按资源组、标签筛选
-- 支持排序（注册时间/到期时间）
+- 支持按标签、资源组筛选
 
 **核心 API：**
 - `QueryDomainList` - 查询域名列表
-- `QueryDomainByDomainName` - 查询域名详情
+- `CheckDomain` - 检查域名可注册性
+- `DescribeDomainRecords` - 列出 DNS 解析记录
+- `UpdateDomainRecord` - 修改解析记录
 
 **使用场景：**
 - 域名资产管理
 - 查询即将到期的域名
-- 按条件筛选域名
-- 域名信息核对
+- DNS 解析排查与修改
+- 域名可注册性检查
+
+**详细文档：** [domain/SKILL.md](domain/SKILL.md)
 
 ---
 
-### 3. 阿里云 SLS 日志查询 (log/)
+### 2. 阿里云 OSS (oss/)
 
-通过阿里云 SLS (Simple Log Service) API 查询日志。
+通过 Python SDK `alibabacloud_oss_v2` 操作阿里云 OSS：列举 Bucket、创建 Bucket、上传 Object。
+
+**功能特性：**
+- 列举当前账号下的所有 Bucket
+- 创建新的存储空间（Bucket）
+- 上传本地文件到 OSS
+- 支持按前缀、标签筛选 Bucket
+- 支持设置 ACL 权限
+
+**核心 API：**
+- `ListBuckets` - 列举 Bucket
+- `PutBucket` - 创建 Bucket
+- `PutObject` - 上传 Object
+
+**使用场景：**
+- OSS 资产盘点
+- 自动化创建存储空间
+- 部署静态资源到 OSS
+- 备份文件到云端
+
+**详细文档：** [oss/SKILL.md](oss/SKILL.md)
+
+---
+
+### 3. 阿里云 CDN (cdn/)
+
+通过 Python SDK `alibabacloud_cdn20180510` 调用阿里云 CDN OpenAPI，管理加速域名。
+
+**功能特性：**
+- 查询加速域名列表与详情
+- 查询域名配置信息
+- 检测 CNAME 解析状态
+- 查询域名备案信息
+- 添加新加速域名
+- 批量更新域名配置
+- 启用/停用加速域名
+- 设置 HTTPS 证书
+
+**核心 API：**
+- `DescribeUserDomains` - 查询用户域名列表
+- `DescribeCdnDomainDetail` - 查询域名详情
+- `DescribeCdnDomainConfigs` - 查询域名配置
+- `DescribeDomainCname` - 检测 CNAME
+- `CheckCdnDomainICP` - 查询备案信息
+- `AddCdnDomain` - 添加域名
+- `BatchUpdateCdnDomain` - 批量更新
+- `StartCdnDomain` - 启用域名
+- `SetCdnDomainSSLCertificate` - 设置证书
+
+**使用场景：**
+- CDN 域名资产管理
+- 新域名接入 CDN
+- HTTPS 证书配置
+- CNAME 解析排查
+
+**详细文档：** [cdn/SKILL.md](cdn/SKILL.md)
+
+---
+
+### 4. 阿里云 SLS (sls/)
+
+通过 Python SDK `alibabacloud_sls20201230` 调用阿里云 SLS (Simple Log Service) API 查询日志。
 
 **功能特性：**
 - 列出指定 Project 下的所有 LogStore
@@ -105,6 +191,35 @@
 - 列出可用日志库
 - 统计日志数据
 
+**详细文档：** [sls/SKILL.md](sls/SKILL.md)
+
+---
+
+### 5. 阿里云账单 (billing/aliyun-instance-bill)
+
+通过 Python SDK `alibabacloud_bssopenapi20171214` 调用阿里云 BSS OpenAPI，查询实例级账单。
+
+**功能特性：**
+- 支持查询最近 18 个月的账单数据
+- 支持按产品类型筛选（ECS、RDS、OSS 等）
+- 支持按订阅类型筛选（预付费/后付费）
+- 支持月/日两种粒度查询
+- 自动分页获取完整数据
+- 支持实例维度或计费项维度查看
+
+**核心 API：**
+- `DescribeInstanceBill` - 查询实例级账单详情
+
+**使用场景：**
+- 月度费用对账
+- 资源消费分析
+- 按产品/按天统计费用
+- 实例级成本追踪
+
+**详细文档：** [billing/aliyun-instance-bill/SKILL.md](billing/aliyun-instance-bill/SKILL.md)
+
+---
+
 ## 快速开始
 
 ### 1. 安装 Skills
@@ -121,9 +236,11 @@ npx skills add https://github.com/shigzz/aliyun-skills
 
 | Skill | 安装命令 |
 |-------|----------|
+| 域名管理 | `npx skills add https://github.com/shigzz/aliyun-skills --skill aliyun-domain-skill` |
+| OSS 存储 | `npx skills add https://github.com/shigzz/aliyun-skills --skill aliyun-oss-skill` |
+| CDN 加速 | `npx skills add https://github.com/shigzz/aliyun-skills --skill aliyun-cdn-skill` |
+| SLS 日志 | `npx skills add https://github.com/shigzz/aliyun-skills --skill aliyun-sls-skills` |
 | 实例账单查询 | `npx skills add https://github.com/shigzz/aliyun-skills --skill aliyun-instance-bill` |
-| 域名查询 | `npx skills add https://github.com/shigzz/aliyun-skills --skill aliyun-domain-skill` |
-| SLS 日志查询 | `npx skills add https://github.com/shigzz/aliyun-skills --skill aliyun-sls-skills` |
 
 ### 2. 配置阿里云访问凭据
 
@@ -141,9 +258,15 @@ export ALIBABA_CLOUD_ACCESS_KEY_SECRET="your-access-key-secret"
 在对应 Skill 目录创建 `.env` 文件：
 
 ```bash
-cp billing/aliyun-instance-bill/.env.example billing/aliyun-instance-bill/.env
-# 或
 cp domain/.env.example domain/.env
+# 或
+cp oss/.env.example oss/.env
+# 或
+cp cdn/.env.example cdn/.env
+# 或
+cp sls/.env.example sls/.env
+# 或
+cp billing/aliyun-instance-bill/.env.example billing/aliyun-instance-bill/.env
 ```
 
 编辑 `.env` 文件：
@@ -162,14 +285,48 @@ ALIBABA_CLOUD_ACCESS_KEY_SECRET=your_access_key_secret
 如果你的 Claude Code 已配置 Skills 目录，可以直接调用：
 
 ```
-查询我 2024 年 3 月的阿里云账单
 列出我账号下的所有域名
+查询我的 OSS Bucket 列表
+列出我的 CDN 加速域名
 查询 SLS 日志 project 为 my-project 的日志
+查询我 2024 年 3 月的阿里云账单
 ```
 
 #### 方式二：直接运行 Python 脚本
 
-各 Skill 目录下的 `reference/` 文件夹包含可运行的示例代码：
+各 Skill 目录下的 `scripts/` 文件夹包含可运行的示例代码：
+
+**域名管理：**
+```bash
+cd domain/scripts
+python query_domainlist.py
+python check_domain.py
+python describe_domain_records.py
+python update_domain_record.py
+```
+
+**OSS 存储：**
+```bash
+cd oss/scripts
+python list_buckets.py --region cn-hangzhou
+python put_bucket.py --bucket my-bucket --region cn-hangzhou
+python put_object.py --bucket my-bucket --key path/to/file.txt --file ./local.txt --region cn-hangzhou
+```
+
+**CDN 加速：**
+```bash
+cd cdn/scripts
+python describe_user_domains.py
+python describe_cdndomain_detail.py
+python describe_domain_cname.py
+```
+
+**SLS 日志：**
+```bash
+cd sls/scripts
+python list_logstores.py --region cn-hangzhou --project your-project
+python get_logs_v2.py --region cn-hangzhou --project your-project --logstore your-logstore --recent-minutes 15
+```
 
 **账单查询：**
 ```bash
@@ -177,27 +334,15 @@ cd billing/aliyun-instance-bill/reference
 python describe_instance_bill.py
 ```
 
-**域名查询：**
-```bash
-cd domain/scripts
-python query_domainlist.py
-python check_domain.py
-```
-
-**日志查询：**
-```bash
-cd log/reference
-python list_logstores.py
-python get_logs_v2.py
-```
-
 ## 各 Skill 详细文档
 
 | Skill | 文档 | 说明 |
 |-------|------|------|
+| 域名管理 | [domain/SKILL.md](domain/SKILL.md) | Domain/DNS API 使用文档 |
+| OSS 存储 | [oss/SKILL.md](oss/SKILL.md) | OSS API 使用文档 |
+| CDN 加速 | [cdn/SKILL.md](cdn/SKILL.md) | CDN API 使用文档 |
+| SLS 日志 | [sls/SKILL.md](sls/SKILL.md) | SLS 日志服务 API 使用文档 |
 | 实例账单查询 | [billing/aliyun-instance-bill/SKILL.md](billing/aliyun-instance-bill/SKILL.md) | BSS 账单 API 使用文档 |
-| 域名查询 | [domain/SKILL.md](domain/SKILL.md) | Domain API 使用文档 |
-| SLS 日志查询 | [log/SKILL.md](log/SKILL.md) | SLS 日志服务 API 使用文档 |
 
 ## 开发指南
 
@@ -210,22 +355,30 @@ python get_logs_v2.py
    - API 使用说明
    - 参数说明
    - 示例代码
-3. 在 `reference/` 目录添加参考代码
-4. 创建 `.env.example` 环境变量模板
+3. 在 `reference/` 目录添加 API 定义（YML）
+4. 在 `scripts/` 目录添加示例脚本
+5. 创建 `.env.example` 环境变量模板
 
 ### 依赖管理
 
 每个 Skill 应包含自己的 `requirements.txt`，列出所需的阿里云 SDK：
 
 ```
+# 域名管理依赖
+alibabacloud_domain20180129>=1.0.0
+alibabacloud_alidns20150109>=1.0.0
+
+# OSS 依赖
+alibabacloud_oss_v2>=1.0.0
+
+# CDN 依赖
+alibabacloud_cdn20180510>=1.0.0
+
+# SLS 日志依赖
+alibabacloud_sls20201230>=1.0.0
+
 # 账单查询依赖
 alibabacloud_bssopenapi20171214>=1.0.0
-
-# 域名查询依赖
-alibabacloud_domain20180129>=1.0.0
-
-# 日志查询依赖
-alibabacloud_sls20201230>=1.0.0
 
 # 通用依赖
 alibabacloud_credentials>=1.0.0
@@ -245,9 +398,11 @@ python-dotenv>=1.0.0
 
 - [阿里云 API 门户](https://api.aliyun.com/)
 - [阿里云 SDK 文档](https://help.aliyun.com/document_detail/53090.html)
-- [BSS OpenAPI 文档](https://help.aliyun.com/document_detail/100392.html)
 - [Domain OpenAPI 文档](https://help.aliyun.com/document_detail/42875.html)
+- [OSS 开发者文档](https://help.aliyun.com/zh/oss/)
+- [CDN OpenAPI 文档](https://help.aliyun.com/document_detail/27152.html)
 - [SLS OpenAPI 文档](https://help.aliyun.com/document_detail/29007.html)
+- [BSS OpenAPI 文档](https://help.aliyun.com/document_detail/100392.html)
 
 ## 许可证
 
