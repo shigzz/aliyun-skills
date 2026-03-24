@@ -1,0 +1,69 @@
+PutBucketAcl: {
+summary: "设置或修改存储空间（Bucket）的访问权限（ACL）。",
+path: "/?acl",
+methods: [
+"put"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+consumes: [
+"application/xml"
+],
+produces: [
+"application/xml"
+],
+operationType: "write",
+deprecated: false,
+systemTags: {
+operationType: "update"
+},
+parameters: [
+{
+name: "bucket",
+in: "host",
+schema: {
+description: "Bucket名称。",
+type: "string",
+required: true,
+example: "examplebucket"
+}
+},
+{
+name: "x-oss-acl",
+in: "header",
+schema: {
+description: "设置Bucket的访问权限ACL。PutBucketAcl接口通过Put请求中的x-oss-acl请求头来设置访问权限，如果没有该请求头，则访问权限设置不生效。
+<br>取值如下：
+
+- public-read-write（公共读写）：所有用户都有该Bucket内的文件的读写权限。请谨慎使用该访问权限。
+- public-read（公共读）：Bucket的拥有者和授权用户有该Bucket内的文件的读写权限，其他用户只有该Bucket内的文件的读权限。请谨慎使用该访问权限。
+- private：Bucket的拥有者和授权用户有该Bucket内的文件的读写权限，其他用户没有权限操作该Bucket内的文件。",
+required: true,
+enumValueTitles: {
+private: "私有",
+public-read: "公共读",
+public-read-write: "公共读写"
+},
+$ref: "#/components/schemas/BucketACL"
+}
+}
+],
+responses: {
+200: { },
+5XX: { }
+},
+responseDemo: "[{"errorExample":"","example":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<root/>","type":"xml"}]",
+title: "设置或修改存储空间的访问权限",
+description: "- 请求者需要对Bucket拥有写入ACL的权限`oss:PutBucketAcl`。
+
+- PutBucketAcl为覆盖语义，即新传入的ACL将覆盖原有的ACL。
+
+- 如果指定要设置ACL的Bucket不存在，调用该接口时将新建Bucket。"
+}

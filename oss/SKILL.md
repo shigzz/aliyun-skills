@@ -1,8 +1,8 @@
 ---
 name: aliyun-oss-skill
 description: >-
-  通过 Python（alibabacloud_oss_v2）操作阿里云 OSS：列举 Bucket（ListBuckets）、创建 Bucket（PutBucket）、上传 Object（PutObject）。
-  适用于「列出 OSS Bucket」「创建存储空间」「上传文件到 OSS」等场景。
+  通过 Python（alibabacloud_oss_v2）操作阿里云 OSS：列举 Bucket（ListBuckets）、创建 Bucket（PutBucket）、设置 Bucket ACL（PutBucketAcl）、上传 Object（PutObject）。
+  适用于「列出 OSS Bucket」「创建存储空间」「修改 Bucket 访问权限」「上传文件到 OSS」等场景。
   API 契约见 reference/*.yml；可运行示例见 scripts/；依赖见 scripts/requirements.txt。
 ---
 
@@ -17,11 +17,13 @@ aliyun-oss-skills/
 ├── reference/                    # API 定义（YML），含入参与返回值说明
 │   ├── list_buckets.yml
 │   ├── put_bucket.yml
+│   ├── put_bucket_acl.yml
 │   └── put_object.yml
 └── scripts/
     ├── oss_util.py               # 凭证与 Client 构造（供脚本复用）
     ├── list_buckets.py
     ├── put_bucket.py
+    ├── put_bucket_acl.py
     ├── put_object.py
     └── requirements.txt
 ```
@@ -36,12 +38,13 @@ aliyun-oss-skills/
 |------|-----|------|----------|
 | **列举 Bucket** | ListBuckets（GetService） | 列出当前账号下的存储空间 | 资产盘点、按前缀/标签筛选 Bucket |
 | **创建 Bucket** | PutBucket | 在指定地域新建存储空间 | 新环境初始化、自动化开通 |
+| **设置 Bucket ACL** | PutBucketAcl | 覆盖式设置 Bucket 访问权限（私有/公共读/公共读写） | 收紧或调整 Bucket 可见性、合规整改 |
 | **上传 Object** | PutObject | 上传本地文件为对象 | 部署静态资源、备份文件 |
 
 **说明**：
 
 - 各能力相互独立，无固定调用顺序。
-- **PutBucket / PutObject 为写操作**：执行前须确认 Bucket 名称、地域、是否覆盖同名对象；避免对生产 Bucket 误操作。
+- **PutBucket / PutBucketAcl / PutObject 为写操作**：执行前须确认 Bucket 名称、地域、ACL 取值（`public-read` / `public-read-write` 风险高）、是否覆盖同名对象；避免对生产 Bucket 误操作。
 - REST 文档中的 query/header 名称（如 `max-keys`）与 Python SDK 字段名可能不同，**以 `alibabacloud_oss_v2.models` 中 Request 类参数为准**（例如 `max_keys`）。
 
 ---
@@ -186,6 +189,52 @@ python scripts/put_bucket.py --bucket my-unique-bucket-name --region cn-hangzhou
 
 ---
 
+# 设置 Bucket ACL（PutBucketAcl）
+
+对**已存在**的 Bucket **覆盖式**设置访问权限（ACL）。REST 上对应 `PUT /?acl`，请求头 `x-oss-acl`；SDK 使用 `PutBucketAclRequest` 的 `acl` 字段。
+
+## 常用请求参数（摘要）
+
+| 参数 | SDK 字段 | 说明 |
+|------|----------|------|
+| bucket（host） | `bucket` | 必填，目标 Bucket 名称 |
+| x-oss-acl | `acl` | 必填：`private`、`public-read`、`public-read-write`（公共读/写请谨慎） |
+
+完整说明与接口行为见 [reference/put_bucket_acl.yml](reference/put_bucket_acl.yml)。
+
+## 行为与注意
+
+- **覆盖语义**：新 ACL 会覆盖原 ACL，并非合并。
+- **权限**：请求者需对 Bucket 拥有写入 ACL 的权限，策略中通常包含 `oss:PutBucketAcl`（以控制台/文档为准）。
+- **Bucket 不存在**：契约说明若指定 Bucket 不存在，调用该接口**会新建 Bucket**；生产自动化仍建议先显式 PutBucket 创建，勿依赖该副作用。
+
+## RAM 权限提示
+
+需要目标 Bucket 的 ACL 写权限，例如 `oss:PutBucketAcl`。
+
+## 核心流程
+
+1. 确认 Bucket 所在 `region`、目标 ACL 取值（优先 `private`）
+2. `Config` + `Client`（与其它脚本相同地域）
+3. 构建 `PutBucketAclRequest(bucket=..., acl=...)`
+4. 调用 `client.put_bucket_acl(request)`
+
+示例脚本：[scripts/put_bucket_acl.py](scripts/put_bucket_acl.py)（SDK 生成骨架；运行前请在请求中设置 `bucket` 与 `acl`，或与 [scripts/oss_util.py](scripts/oss_util.py) 的 `create_client` 方式对齐后再调用）。
+
+### 代码示例
+
+```python
+from alibabacloud_oss_v2 import models as oss_models
+
+req = oss_models.PutBucketAclRequest(
+    bucket="examplebucket",
+    acl="private",  # 或 public-read、public-read-write（慎用）
+)
+resp = client.put_bucket_acl(req)
+```
+
+---
+
 # 上传 Object（PutObject）
 
 将**本地文件**上传为指定 Bucket 下的 Object。**默认允许覆盖**同名 Object；可使用 `--forbid-overwrite` 禁止覆盖（版本控制 Bucket 下行为以官方文档为准）。
@@ -242,7 +291,7 @@ OSS Python SDK 异常类型见 `alibabacloud_oss_v2.exceptions`（如 `ServiceEr
 
 1. 检查环境变量或 `.env`，确认凭证已配置。
 2. 安装 `scripts/requirements.txt`。
-3. 根据场景选择 ListBuckets / PutBucket / PutObject，对照 YML 与 `models` 中的 Request 字段构造请求。
+3. 根据场景选择 ListBuckets / PutBucket / PutBucketAcl / PutObject，对照 YML 与 `models` 中的 Request 字段构造请求。
 4. 调用对应 `client` 方法，解析 JSON 输出或 Result 对象。
 
 ## 注意事项
