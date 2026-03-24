@@ -1,154 +1,215 @@
 ---
 name: aliyun-sls-skills
 description: >-
-  通过 Python 代码调用阿里云 SLS (Simple Log Service) API 查询日志。支持
-  ListLogStores（列出日志库）和 GetLogsV2（查询日志）接口。使用场景：用户要求查询
-  阿里云 SLS 日志、列出 LogStore、搜索日志内容、分析 SLS 数据时触发此技能。
+  通过 Python（alibabacloud_sls20201230）调用阿里云 SLS：ListLogStores（列出日志库）、GetLogsV2（查询日志）。
+  适用于「列出 LogStore」「查询 SLS 日志」「搜索与分析日志」等场景。
+  API 契约见 reference/*.yml；可运行示例见 scripts/；依赖见 scripts/requirements.txt。
 ---
 
-# 阿里云 SLS 日志查询
+## 能力概述
 
-通过 Python SDK `alibabacloud_sls20201230` 调用阿里云 SLS API，支持 ListLogStores 和 GetLogsV2 两个接口。
+## 目录结构
 
-## 前置检查（必须首先执行）
+```
+aliyun-sls-skills/
+├── SKILL.md
+├── .env.example
+├── reference/                    # API 定义（YML），含入参与返回值
+│   ├── list_logstores.yml
+│   └── get_log_v2.yml
+└── scripts/
+    ├── sls_util.py               # 凭证与 Client 构造（供脚本复用）
+    ├── list_logstores.py
+    ├── get_logs_v2.py
+    └── requirements.txt
+```
 
-在编写任何 SLS 查询代码之前，**必须先检查**阿里云凭证是否已配置。
+- **reference/**：存放 API 相关信息（YML 片段），供查阅参数与响应含义。
+- **scripts/**：可直接运行的示例（例如在 `aliyun-sls-skills` 目录下执行 `python scripts/list_logstores.py ...`）；也可阅读实现后改写。
+- **依赖**：`pip install -r aliyun-sls-skills/scripts/requirements.txt`。
 
-运行以下命令检查环境变量：
+本 skill 提供以下**独立能力**，可按需组合：
+
+| 能力 | API | 用途 | 使用场景 |
+|------|-----|------|----------|
+| **列出日志库** | ListLogStores | 列出 Project 下 LogStore | 确认 logstore 名称、分页浏览 |
+| **查询日志** | GetLogsV2 | 按时间范围与查询语句拉取日志 | 检索错误日志、SQL 分析、scan 模式 |
+
+**说明**：
+
+- 若用户不确定 `logstore` 名称，可先 **ListLogStores** 再 **GetLogsV2**。
+- **GetLogsV2** 时间区间为**左闭右开** `[from, to)`，且须满足 `from < to`。
+- Python SDK 中请求参数字段名以 `alibabacloud_sls20201230.models` 为准（例如 `GetLogsV2Request` 使用 `from_`、`to`，而非 `from_time` / `to_time`）。
+
+---
+
+# 前置检查（必须首先执行）
+
+调用 SLS 前须确认访问凭证已配置。
+
+### 检查顺序
+
+**1. 环境变量**
 
 ```bash
 echo "AK_ID: ${ALIBABA_CLOUD_ACCESS_KEY_ID:+已设置}"
 echo "AK_SECRET: ${ALIBABA_CLOUD_ACCESS_KEY_SECRET:+已设置}"
 ```
 
-如果输出为空，说明未设置。引导用户通过以下任一方式配置：
-
-**方式一：环境变量（推荐）**
+**2. 当前目录 `.env`**
 
 ```bash
-export ALIBABA_CLOUD_ACCESS_KEY_ID="your-access-key-id"
-export ALIBABA_CLOUD_ACCESS_KEY_SECRET="your-access-key-secret"
+find . -maxdepth 1 -name ".env" -exec cat {} \;
 ```
 
-**方式二：项目 .env 文件**
+示例见 [.env.example](.env.example)。
 
-在项目根目录创建 `.env` 文件：
-
-```
-ALIBABA_CLOUD_ACCESS_KEY_ID=your-access-key-id
-ALIBABA_CLOUD_ACCESS_KEY_SECRET=your-access-key-secret
-```
-
-然后在 Python 代码入口处加载：
+**3. Python 中加载（与 scripts 行为一致）**
 
 ```python
 from dotenv import load_dotenv
-load_dotenv()
+import os
+
+access_key_id = os.environ.get("ALIBABA_CLOUD_ACCESS_KEY_ID", "").strip()
+access_key_secret = os.environ.get("ALIBABA_CLOUD_ACCESS_KEY_SECRET", "").strip()
+
+if not access_key_id or not access_key_secret:
+    load_dotenv()
+    access_key_id = os.environ.get("ALIBABA_CLOUD_ACCESS_KEY_ID", "").strip()
+    access_key_secret = os.environ.get("ALIBABA_CLOUD_ACCESS_KEY_SECRET", "").strip()
+
+if not access_key_id or not access_key_secret:
+    raise RuntimeError("缺少 ALIBABA_CLOUD_ACCESS_KEY_ID / ALIBABA_CLOUD_ACCESS_KEY_SECRET")
 ```
 
-**方式三：让 Agent 协助配置**
+未通过凭证检查时不应继续调用 API。
 
-如果环境变量和 `.env` 文件都未配置，**Agent 应主动向用户提问**获取凭证信息：
-
-1. Agent 向用户发送请求："未检测到阿里云凭证，请提供 AccessKey ID 和 AccessKey Secret"
-2. 用户回复后，Agent 将凭证设置到环境变量或写入 `.env` 文件
-3. Agent 继续后续操作
-
-> 凭证检查未通过时，**不要继续执行后续步骤**，先让用户完成配置。
+---
 
 ## 安装依赖
 
 ```bash
-pip install alibabacloud_sls20201230 alibabacloud_credentials alibabacloud_tea_openapi alibabacloud_tea_util
+pip install -r aliyun-sls-skills/scripts/requirements.txt
 ```
 
-如果使用 `.env` 方式还需安装：
+或手动安装（与仓库其他 Tea SDK skill 一致）：
 
 ```bash
-pip install python-dotenv
+pip install alibabacloud_sls20201230 alibabacloud_credentials alibabacloud_tea_openapi alibabacloud_tea_util python-dotenv
 ```
+
+---
 
 ## 创建 SLS Client
 
-region 由用户提供（如 `cn-hangzhou`、`cn-shanghai`、`cn-beijing` 等），拼接为 endpoint：
+`endpoint` 格式为 `{region}.log.aliyuncs.com`。示例脚本通过 [scripts/sls_util.py](scripts/sls_util.py) 的 `create_sls_client(region)` 使用 **显式 AK/SK**（与 [aliyun-domain-skills/scripts/query_domainlist.py](../aliyun-domain-skills/scripts/query_domainlist.py) 相同）。
+
+若需无 AK 链（ECS 角色、OIDC 等），可在自定义代码中改用 `CredentialClient()` 传入 `open_api_models.Config(credential=credential)`，并仍设置 `endpoint`。
 
 ```python
 from alibabacloud_sls20201230.client import Client as Sls20201230Client
 from alibabacloud_credentials.client import Client as CredentialClient
 from alibabacloud_tea_openapi import models as open_api_models
 
-
-def create_sls_client(region: str) -> Sls20201230Client:
-    credential = CredentialClient()
-    config = open_api_models.Config(credential=credential)
-    config.endpoint = f'{region}.log.aliyuncs.com'
-    return Sls20201230Client(config)
+credential = CredentialClient()
+config = open_api_models.Config(credential=credential)
+config.endpoint = f"{region}.log.aliyuncs.com"
+client = Sls20201230Client(config)
 ```
 
-## ListLogStores
+---
 
-列出指定 Project 下的所有 LogStore。
+# ListLogStores
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| project | str | 是 | SLS Project 名称 |
-| logstore_name | str | 否 | 按名称过滤（模糊匹配） |
-| offset | int | 否 | 分页偏移量，默认 0 |
-| size | int | 否 | 每页返回数量，默认 200，最大 500 |
-| telemetry_type | str | 否 | 日志类型（None/Metrics） |
-| mode | str | 否 | LogStore 类型（standard/query） |
+列出指定 **project** 下的 LogStore。完整字段见 [reference/list_logstores.yml](reference/list_logstores.yml)。
+
+## 常用参数（摘要）
+
+| 概念 | SDK 字段 | 说明 |
+|------|----------|------|
+| project | 方法参数 `project` | 必填 |
+| logstoreName | `logstore_name` | 模糊匹配过滤 |
+| offset / size | `offset` / `size` | 分页，size 最大 500，默认 200 |
+| telemetryType | `telemetry_type` | 日志 / Metrics |
+| mode | `mode` | `standard` / `query` |
+
+## 核心流程
+
+1. `create_sls_client(region)`
+2. 构建 `ListLogStoresRequest`
+3. `client.list_log_stores_with_options(project, request, {}, runtime)`
+4. 使用 `resp.body.to_map()` 得到字典
+
+示例脚本：[scripts/list_logstores.py](scripts/list_logstores.py)
+
+### 命令行示例
+
+```bash
+cd aliyun-sls-skills
+python scripts/list_logstores.py --region cn-hangzhou --project your-project
+python scripts/list_logstores.py --region cn-hangzhou --project your-project --logstore-name app
+```
+
+### 代码示例
 
 ```python
 from alibabacloud_sls20201230 import models as sls_models
 from alibabacloud_tea_util import models as util_models
 import json
 
+from sls_util import create_sls_client
 
-def list_logstores(client, project: str, logstore_name: str = None) -> dict:
-    request = sls_models.ListLogStoresRequest()
-    if logstore_name:
-        request.logstore_name = logstore_name
-    runtime = util_models.RuntimeOptions()
-    resp = client.list_log_stores_with_options(project, request, {}, runtime)
-    return resp.body.to_map()
-```
-
-用法：
-
-```python
 client = create_sls_client("cn-hangzhou")
-result = list_logstores(client, "your-project-name")
-print(json.dumps(result, default=str, indent=2, ensure_ascii=False))
-
-# 按名称过滤查询
-result = list_logstores(client, "your-project-name", logstore_name="error")
+request = sls_models.ListLogStoresRequest(logstore_name="error")
+runtime = util_models.RuntimeOptions()
+resp = client.list_log_stores_with_options("your-project", request, {}, runtime)
+print(json.dumps(resp.body.to_map(), default=str, indent=2, ensure_ascii=False))
 ```
 
-**响应结构**：
-- `total`: 符合条件的 LogStore 总数
-- `count`: 当前返回的行数
-- `logstores`: LogStore 名称列表
+**响应**（body，常见字段）：`total`、`count`、`logstores` 等，以实际返回为准。
 
-完整参考代码见 [reference/list_logstores.py](reference/list_logstores.py)。
+---
 
-## GetLogsV2
+# GetLogsV2
 
-查询指定 LogStore 中的日志（V2 版本接口，支持更多参数和优化的响应格式）。
+在指定 **project**、**logstore** 上按时间范围查询。完整说明见 [reference/get_log_v2.yml](reference/get_log_v2.yml)。
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| project | str | 是 | SLS Project 名称 |
-| logstore | str | 是 | LogStore 名称 |
-| from_time | int | 是 | 起始时间（Unix 时间戳，秒），左闭右开区间 |
-| to_time | int | 是 | 结束时间（Unix 时间戳，秒），左闭右开区间 |
-| query | str | 否 | SLS 查询语句（支持搜索和 SQL 分析） |
-| line | int | 否 | 返回行数，默认 100，最大 100（仅查询语句时有效） |
-| offset | int | 否 | 分页偏移量，默认 0（仅查询语句时有效） |
-| reverse | bool | 否 | 是否按时间逆序，默认 false（仅查询语句时有效） |
-| topic | str | 否 | 日志主题，默认空 |
-| powerSql | bool | 否 | 是否开启独享 SQL，默认 false |
-| session | str | 否 | 查询参数，如 "mode=scan" |
-| isAccurate | bool | 否 | 是否开启纳秒级有序 |
+## 常用参数（摘要）
+
+| 概念 | SDK 字段 | 说明 |
+|------|----------|------|
+| from（Unix 秒） | `from_` | 区间左端（含） |
+| to（Unix 秒） | `to` | 区间右端（不含） |
+| query | `query` | 搜索或 SQL 分析语句 |
+| line / offset | `line` / `offset` | 搜索语句下的分页，line 最大 100 |
+| reverse | `reverse` | 是否按时间逆序（搜索语句时） |
+| topic | `topic` | 主题 |
+| powerSql | `power_sql` | SQL 增强 |
+| session | `session` | 如 `mode=scan` |
+| Accept-Encoding | `GetLogsV2Headers(accept_encoding=...)` | 如 `lz4`、`gzip` |
+
+> 若 `query` 为分析语句，`line`/`offset` 往往不生效，请用 SQL `LIMIT` 等分页（见官方文档）。
+
+## 核心流程
+
+1. 构建 `GetLogsV2Request(from_=..., to=..., query=..., ...)`
+2. `headers = GetLogsV2Headers(accept_encoding="lz4")`（或 `gzip`）
+3. `client.get_logs_v2with_options(project, logstore, request, headers, runtime)`
+4. `resp.body.to_map()` — 通常含 `meta`、`data`
+
+示例脚本：[scripts/get_logs_v2.py](scripts/get_logs_v2.py)
+
+### 命令行示例
+
+```bash
+python scripts/get_logs_v2.py --region cn-hangzhou --project your-project --logstore your-logstore --recent-minutes 15 --query "error"
+python scripts/get_logs_v2.py --region cn-hangzhou --project your-project --logstore your-logstore \
+  --from-time 1700000000 --to-time 1700003600 --query '* | SELECT count(*) AS cnt'
+python scripts/get_logs_v2.py --region cn-hangzhou --project your-project --logstore your-logstore \
+  --from-time 1700000000 --to-time 1700003600 --query '*' --session "mode=scan"
+```
+
+### 代码示例
 
 ```python
 import time
@@ -156,96 +217,57 @@ from alibabacloud_sls20201230 import models as sls_models
 from alibabacloud_tea_util import models as util_models
 import json
 
+from sls_util import create_sls_client
 
-def get_logs_v2(client, project: str, logstore: str,
-                from_time: int, to_time: int,
-                query: str = "", line: int = 100, offset: int = 0,
-                reverse: bool = False, topic: str = "",
-                power_sql: bool = False) -> dict:
-    request = sls_models.GetLogsV2Request(
-        query=query,
-        from_=from_time,
-        to=to_time,
-        line=line,
-        offset=offset,
-        reverse=reverse,
-        topic=topic,
-        power_sql=power_sql,
-    )
-    headers = sls_models.GetLogsV2Headers(accept_encoding="lz4")
-    runtime = util_models.RuntimeOptions()
-    resp = client.get_logs_v2with_options(project, logstore, request, headers, runtime)
-    return resp.body.to_map()
-
-
-def get_recent_logs_v2(client, project: str, logstore: str,
-                       query: str = "", minutes: int = 15) -> dict:
-    """查询最近 N 分钟的日志（便捷方法）"""
-    now = int(time.time())
-    return get_logs_v2(client, project, logstore, now - minutes * 60, now, query)
-```
-
-用法：
-
-```python
 client = create_sls_client("cn-hangzhou")
-
-# 查询最近 15 分钟日志
-result = get_recent_logs_v2(client, "your-project", "your-logstore", query="error")
-print(json.dumps(result, default=str, indent=2, ensure_ascii=False))
-
-# 指定时间范围查询
-result = get_logs_v2(client, "your-project", "your-logstore",
-                     from_time=1700000000, to_time=1700003600,
-                     query="* | SELECT count(*) as cnt")
-
-# 使用 scan 模式查询大量数据
-result = get_logs_v2(client, "your-project", "your-logstore",
-                     from_time=1700000000, to_time=1700003600,
-                     query="*", session="mode=scan")
+now = int(time.time())
+request = sls_models.GetLogsV2Request(
+    query="error",
+    from_=now - 900,
+    to=now,
+    line=100,
+    offset=0,
+    reverse=False,
+)
+headers = sls_models.GetLogsV2Headers(accept_encoding="lz4")
+runtime = util_models.RuntimeOptions()
+resp = client.get_logs_v2with_options("your-project", "your-logstore", request, headers, runtime)
+print(json.dumps(resp.body.to_map(), default=str, indent=2, ensure_ascii=False))
 ```
 
-**响应结构**：
-- `meta`: 查询元数据
-  - `progress`: 查询完成状态（Complete/Incomplete）
-  - `count`: 返回的日志行数
-  - `processedRows`: 处理的行数
-  - `elapsedMillisecond`: 查询耗时（毫秒）
-  - `hasSQL`: 是否为 SQL 查询
-  - `keys`: 查询结果中所有的 key
-- `data`: 日志数据数组
-
-完整参考代码见 [reference/get_logs_v2.py](reference/get_logs_v2.py)。
+---
 
 ## 错误处理
-
-所有 API 调用应使用 try/except 捕获异常：
 
 ```python
 try:
     resp = client.get_logs_v2with_options(project, logstore, request, headers, runtime)
 except Exception as error:
-    print(f"错误: {error.message}")
-    if hasattr(error, 'data') and error.data:
-        print(f"诊断: {error.data.get('Recommend', '')}")
+    print(getattr(error, "message", str(error)))
+    if hasattr(error, "data") and error.data:
+        print(error.data.get("Recommend", ""))
 ```
 
-| 常见错误 | 原因 | 处理方式 |
-|----------|------|----------|
-| 401/403 | AK/SK 无效或无权限 | 检查环境变量和 RAM 权限 |
-| ProjectNotExist | Project 名称错误 | 确认 Project 名称和 region |
-| LogStoreNotExist | LogStore 名称错误 | 先用 ListLogStores 查看可用的 LogStore |
-| ParameterInvalid | 请求参数错误 | 检查时间范围和 query 语法 |
+脚本使用 [scripts/sls_util.py](scripts/sls_util.py) 中的 `print_operation_error` 做同类输出。
 
-## 使用流程
+| 常见情况 | 说明 |
+|----------|------|
+| 401/403 | AK/SK 或 RAM 权限不足 |
+| ProjectNotExist | Project 名或 region 错误 |
+| LogStoreNotExist | 先用 ListLogStores 核对名称 |
+| ParameterInvalid | 时间区间、query 语法等 |
 
-```
-1. 检查凭证 → ALIBABA_CLOUD_ACCESS_KEY_ID / SECRET 是否已设置
-2. 安装依赖 → pip install 所需包
-3. 确认信息 → 向用户确认 region、project 名称
-4. 列出 LogStore → 调用 ListLogStores 了解可用的日志库
-5. 查询日志 → 调用 GetLogsV2，传入 project、logstore、时间范围和查询条件
-```
+---
 
-> 如果用户不确定 project 或 logstore 名称，先执行第 4 步列出所有可用的 LogStore。
+## 使用流程小结
+
+1. 检查环境变量或 `.env` 中的 AK/SK。
+2. 安装 `scripts/requirements.txt`。
+3. 确认 **region**、**project**；不确定 logstore 时先 **ListLogStores**。
+4. **GetLogsV2** 传入合法时间区间与 `query`，解析 `body` 中 `meta` / `data`。
+
+## 注意事项
+
+- **reference/** 用于查契约；**scripts/** 用于验证环境与调用方式。
+- 业务与示例不符时，以 [SLS 官方文档](https://help.aliyun.com/zh/sls/) 与当前 SDK 模型为准。
 
