@@ -1,7 +1,7 @@
 ---
 name: aliyun-deploy
 description: >-
-  编排将前端静态构建产物部署到阿里云：假设域名、云解析 DNS、OSS、CDN 等云资源均在同一阿里云账号下。**部署域名、CDN 加速域名、OSS Bucket 必须由用户指定，Agent 不得擅自确定**；可先查询账号内现有资源或创建新资源作为候选，**列出供用户选择后再执行**。若 `.aliyun-deploy.json` 已记录完整部署上下文，可判定为**增量更新**，仅上传 OSS 并刷新 CDN。遇 OpenAPI **权限不足**须**立即停止**，待用户配置 RAM 后再继续。流程含 CNAME 与证书 TXT 分离、Let’s Encrypt（certbot DNS-01）上传至 CDN、缓存刷新与验收。
+  编排将前端静态构建产物部署到阿里云：假设域名、云解析 DNS、OSS、CDN 等云资源均在同一阿里云账号下。**部署域名、CDN 加速域名、OSS Bucket 必须由用户指定，Agent 不得擅自确定**；可先查询账号内现有资源或创建新资源作为候选，**列出供用户选择后再执行**。若 `.aliyun-config.json` 已记录完整部署上下文，可判定为**增量更新**，仅上传 OSS 并刷新 CDN。遇 OpenAPI **权限不足**须**立即停止**，待用户配置 RAM 后再继续。流程含 CNAME 与证书 TXT 分离、Let’s Encrypt（certbot DNS-01）上传至 CDN、缓存刷新与验收。
   依赖 aliyun-domain-skills、aliyun-oss-skills、aliyun-cdn-skills；若当前环境缺失则须先安装。执行 API 前须完成凭证检查。
 ---
 
@@ -80,11 +80,11 @@ description: >-
 
 部署可能产生：**OSS 存储与请求费用**、**CDN 流量与 HTTPS 费用**、**域名续费**。Let’s Encrypt 签发免费，但 Agent/用户需自行承担 certbot 与 DNS 操作成本。变更前向用户说明可能产生费用；生产变更建议先在测试域名验证。
 
-## 项目绑定配置（`.aliyun-deploy.json`）
+## 项目绑定配置（`.aliyun-config.json`）
 
-将本次部署绑定的信息写入**项目根目录**下的 `.aliyun-deploy.json`（仅本机/仓库是否提交由团队规范决定；勿提交密钥）。
+将本次部署绑定的信息写入**项目根目录**下的 `.aliyun-config.json`（仅本机/仓库是否提交由团队规范决定；勿提交密钥）。
 
-**说明**：历史文档或 [CLAUDE.md](../CLAUDE.md) 中若出现 `.aliyun-cdn-config.json`，表示偏 CDN 单能力场景；**本编排 SKILL 以 `.aliyun-deploy.json` 为准**，可包含 OSS 与域名等全量字段。
+**说明**：历史文档或 [CLAUDE.md](../CLAUDE.md) 中若出现 `.aliyun-cdn-config.json`，表示偏 CDN 单能力场景；**本编排 SKILL 以 `.aliyun-config.json` 为准**，可包含 OSS 与域名等全量字段。
 
 **建议字段**（可按实际增减）：
 
@@ -109,7 +109,7 @@ Agent 应在关键步骤后更新该文件，便于下次幂等续跑。
 
 **含义**：仅 **上传 OSS** 与 **刷新 CDN**，不重做域名/CDN/DNS/证书等基建。
 
-若项目根目录已存在 **`.aliyun-deploy.json`**，且从中读取到的字段表明 **上一轮全量部署已完成、资源齐备**（至少包含用户曾确认的 **`oss_bucket`**、**`oss_region`**（及可推导或已写的 **`oss_endpoint`**）、**`cdn_domain`**、**`cdn_cname_target`**、**`origin_mode`** 等关键信息，并与本次用户意图一致），则可将本次任务判定为 **增量更新**：
+若项目根目录已存在 **`.aliyun-config.json`**，且从中读取到的字段表明 **上一轮全量部署已完成、资源齐备**（至少包含用户曾确认的 **`oss_bucket`**、**`oss_region`**（及可推导或已写的 **`oss_endpoint`**）、**`cdn_domain`**、**`cdn_cname_target`**、**`origin_mode`** 等关键信息，并与本次用户意图一致），则可将本次任务判定为 **增量更新**：
 
 - **跳过**：§1 域名开通与选择、§2 新建 Bucket、§4 新增加速域名、§5 DNS/CNAME/证书 TXT、§6 HTTPS 初次配置等「基建」步骤（除非用户明确要求变更其中任一项或文件明显过期）。
 - **执行**：**前端构建** → 按文件中记录的 Bucket / 路径前缀将产物 **上传 OSS** → 对相应 URL 或目录执行 **CDN 刷新/预热**（见 §3）→ 更新 **`last_deploy_at`**。
@@ -146,11 +146,11 @@ Agent 应在关键步骤后更新该文件，便于下次幂等续跑。
 | OSS | **Bucket 名称**与 **region**；**从已有 Bucket 中选**还是 **新建后再由用户确认**；静态文件上传的**路径前缀**（根目录或 `prefix/`）。 |
 | 安全与访问 | **公开读**还是 **私有 Bucket + CDN 私有回源**（见 §2）；是否接受由此带来的权限与费用影响。 |
 
-用户确认后，将结果写入 `.aliyun-deploy.json` 并在后续步骤中保持一致；若用户中途变更，须重新确认并更新配置。
+用户确认后，将结果写入 `.aliyun-config.json` 并在后续步骤中保持一致；若用户中途变更，须重新确认并更新配置。
 
 ## 主流程（有序）
 
-**入口分支**：开始前读取 **`.aliyun-deploy.json`**。若满足上文 **[增量更新判定](#增量更新判定)**，且用户本次仅为发版/更新静态资源，则 **直接从 [§3 构建与上传](#3-构建与上传) 执行**（上传 OSS + 刷新 CDN，并更新 `last_deploy_at`），无需重复走域名/CDN/DNS/证书全流程。
+**入口分支**：开始前读取 **`.aliyun-config.json`**。若满足上文 **[增量更新判定](#增量更新判定)**，且用户本次仅为发版/更新静态资源，则 **直接从 [§3 构建与上传](#3-构建与上传) 执行**（上传 OSS + 刷新 CDN，并更新 `last_deploy_at`），无需重复走域名/CDN/DNS/证书全流程。
 
 否则，以下各步均在 **[须向用户确认的信息](#须向用户确认的信息)** 已落实的前提下执行（全量或配置变更）。
 
@@ -227,7 +227,7 @@ Agent 应在关键步骤后更新该文件，便于下次幂等续跑。
 
 ### 9. 收尾
 
-- 更新 `.aliyun-deploy.json`。
+- 更新 `.aliyun-config.json`。
 - 向用户返回 **HTTPS 访问地址**，并提示 **证书续期**、**费用**与 **后续发版时重新上传 OSS + 刷新 CDN**。
 
 ## 故障排查简表
