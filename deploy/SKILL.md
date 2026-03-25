@@ -2,7 +2,7 @@
 name: aliyun-deploy
 description: >-
   编排将前端静态构建产物部署到阿里云：假设域名、云解析 DNS、OSS、CDN 等云资源均在同一阿里云账号下。**部署域名、CDN 加速域名、OSS Bucket 必须由用户指定，Agent 不得擅自确定**；可先查询账号内现有资源或创建新资源作为候选，**列出供用户选择后再执行**。若 `.aliyun-deploy.json` 已记录完整部署上下文，可判定为**增量更新**，仅上传 OSS 并刷新 CDN。遇 OpenAPI **权限不足**须**立即停止**，待用户配置 RAM 后再继续。流程含 CNAME 与证书 TXT 分离、Let’s Encrypt（certbot DNS-01）上传至 CDN、缓存刷新与验收。
-  依赖本仓库 aliyun-domain-skills、aliyun-oss-skills、aliyun-cdn-skills 的能力说明与脚本；执行 API 前须完成凭证检查。
+  依赖 aliyun-domain-skills、aliyun-oss-skills、aliyun-cdn-skills；若当前环境缺失则须先安装。执行 API 前须完成凭证检查。
 ---
 
 ## 资源范围说明（重要）
@@ -30,6 +30,13 @@ description: >-
 | 域名列表与资产 | [aliyun-domain-skills/SKILL.md](aliyun-domain-skills/SKILL.md) |
 | OSS Bucket / 上传 | [aliyun-oss-skills/SKILL.md](aliyun-oss-skills/SKILL.md) |
 | CDN 域名、CNAME 检测、备案、证书、启停 | [aliyun-cdn-skills/SKILL.md](aliyun-cdn-skills/SKILL.md) |
+
+**若上述 skill 在当前环境不存在**：执行本编排前 **须先安装或引入** 它们（确保能打开对应目录下的 `SKILL.md` 并安装各 skill 的 Python 依赖）。可选方式包括：
+
+- **本仓库 / Monorepo**：将 `aliyun-domain-skills`、`aliyun-oss-skills`、`aliyun-cdn-skills` 置于同一 skills 根目录（或克隆含全套子目录的仓库）。
+- **外部 registry**（如 `npx skills add` 等）：按发布方文档中的 **skill id** 安装等价能力（名称可能与本地目录 `aliyun-*-skills` 不一致）；安装完成后应能定位到可读的技能说明与脚本。
+
+缺任一依赖 skill 时，**不要**跳过文档直接盲调 OpenAPI；应先补齐 skill 再继续。
 
 **环境与工具**：
 
@@ -113,7 +120,8 @@ Agent 应在关键步骤后更新该文件，便于下次幂等续跑。
 
 1. 确认是静态前端项目，**构建命令成功**（如 `npm run build`），产出目录明确（常见 `dist/`、`build/`、`out/`）。
 2. **SPA**：确认 `base` / `publicPath` / `assetPrefix` 与最终访问路径一致；路由为 History 模式时，需 **404 回退到 `index.html`**（见下文 OSS 静态网站或 CDN 自定义错误页）。
-3. 若静态页需调用**跨域 API**，评估 OSS/CORS 与 CDN 响应头（本仓库 OSS skill 能力与控制台文档）。
+3. **根路径须映射到 `index.html`**：用户通过浏览器访问站点 **`/`**（根 URL）时，必须能拿到入口页 **`index.html`**（或与构建产物一致的默认文档名），不能是空白、目录列表或未配置的 404。实现依赖下文 **OSS 默认首页** 与 **CDN 根路径/默认对象**（若产品支持）等配置；上传时须保证 **`index.html` 位于站点根**（相对所选 OSS 路径前缀的根）。
+4. 若静态页需调用**跨域 API**，评估 OSS/CORS 与 CDN 响应头（本仓库 OSS skill 能力与控制台文档）。
 
 ## 须向用户确认的信息
 
@@ -163,8 +171,8 @@ Agent 应在关键步骤后更新该文件，便于下次幂等续跑。
 
 ### 3. 构建与上传
 
-- 执行项目构建；将产物 **同步上传到** 目标 Bucket 路径（如根目录或 `prefix/`）。
-- **静态网站托管**（若使用 OSS 静态网站域名或需默认首页/错误页）：在 OSS 侧开启静态网站、设置 **默认首页**（`index.html`）与 **404 页**（SPA 常设为同一 `index.html`）。
+- 执行项目构建；将产物 **同步上传到** 目标 Bucket 路径（如根目录或 `prefix/`）；确保 **`index.html` 落在该路径的根**（与「根路径映射到 `index.html`」一致）。
+- **静态网站托管**（若使用 OSS 静态网站域名或经 CDN 回源 OSS 需提供默认文档）：在 OSS 侧开启静态网站，将 **默认首页** 设为 **`index.html`**，使访问目录根或 `/` 等价于拉取该文件；**404 页**（SPA 常设为同一 `index.html`）用于 History 路由深链。
 - **部署后刷新**：上传完成后，对 CDN 执行 **刷新/预热**（如 RefreshObjectCaches 等，见 CDN OpenAPI/控制台），否则用户可能长期看到旧资源。
 
 ### 4. CDN 加速域名
@@ -173,6 +181,7 @@ Agent 应在关键步骤后更新该文件，便于下次幂等续跑。
 - 使用已有加速域名或 **添加加速域名**（参考 [aliyun-cdn-skills](aliyun-cdn-skills/SKILL.md) 中 AddCdnDomain 等）。
 - **业务类型（必设）**：新增加速域名时，控制台 **业务类型** 请选择 **「图片小文件」**；调用 OpenAPI 时参数 **`CdnType` 填 `web`**（与静态前端 HTML/JS/CSS 及小体积资源匹配）。勿默认选「大文件下载」「视音频点播」等，除非用户明确有对应场景。字段说明见 [add_cdndomain.yml — CdnType](aliyun-cdn-skills/reference/add_cdndomain.yml)。
 - **源站**：选 OSS 域名，回源 HOST、协议等与控制台要求一致。
+- **根路径与默认页**：用户访问 **`https://<加速域名>/`** 时必须能打开入口页；除 OSS 静态网站 **默认首页 = `index.html`** 外，若 CDN 提供 **默认根对象 / 首页 / URL 重写** 等能力，须配置为与 OSS 行为一致，避免根路径 403、404 或返回错误内容。
 - **中国内地加速**：添加前用 **CheckCdnDomainICP**（见 aliyun-cdn-skills）等确认 **ICP 备案** 要求；海外加速按产品与地域策略处理。
 - 用户指定加速域名形态（如 `www.example.com` 或子域）；与 OSS 公共读/私有回源选择一致。
 
@@ -214,7 +223,7 @@ Agent 应在关键步骤后更新该文件，便于下次幂等续跑。
 ### 8. 启用与验收
 
 - 若域名为停用状态，执行 **启用加速域名**（StartCdnDomain，见 aliyun-cdn-skills）。
-- **验收**：浏览器访问 `https://<加速域名>`；可选 `curl -I` 检查状态码与跳转；CNAME 与证书链无告警。
+- **验收**：浏览器访问 `https://<加速域名>` 与 **`https://<加速域名>/`**，确认根路径返回 **`index.html`** 对应页面；可选 `curl -I` 检查状态码与跳转；CNAME 与证书链无告警。
 
 ### 9. 收尾
 
@@ -227,6 +236,7 @@ Agent 应在关键步骤后更新该文件，便于下次幂等续跑。
 |------|----------|----------|
 | OpenAPI 403 / Forbidden / NoPermission 等 | 当前 AK 对应 RAM 策略未授权该 API | **立即停止任务**；告知用户补全 RAM 权限，**待用户配置完成后再继续**（见上文「OpenAPI 报权限不足时」） |
 | 403 | Bucket 私有且未正确配置 CDN 回源鉴权 / 策略过严 | 检查 OSS 权限与 CDN 源站配置 |
+| 访问 `/` 为 403/404 或非 HTML | 根路径未映射到 `index.html`（默认首页未设或对象不在根） | OSS 静态网站默认首页设为 `index.html`；核对 CDN 默认根对象/重写；确认 `index.html` 已上传到站点根 |
 | 页面空白或路由 404 | SPA 未将 404 指回 `index.html` | OSS 静态网站错误页或 CDN 自定义页 |
 | 样式/脚本报错旧版本 | CDN 缓存未失效 | 刷新/预热对应 Object 或目录 |
 | 证书错误 | 证书与域名不匹配或未部署完整链 | 检查 SAN、fullchain、CDN 证书配置 |
