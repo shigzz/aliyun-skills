@@ -259,6 +259,42 @@ except Exception as error:
 
 ---
 
+## 配置文件说明
+
+SLS 相关配置（`region`、`project`、`logstore` 等）优先从 `.aliyun-config.json` 文件中读取。
+
+### 配置读取逻辑
+
+1. **读取配置**：首先尝试从 `.aliyun-config.json` 中读取 SLS 配置
+2. **询问用户**：如果配置不存在，询问用户输入相关参数
+3. **持久化配置**：如果用户确认，将配置写入 `.aliyun-config.json` 文件
+
+### 配置格式示例
+
+```json
+{
+  "sls": [
+    {
+      "region": "cn-hangzhou",
+      "project": "your-project-1",
+      "logstore": "app-log"
+    },
+    {
+      "region": "cn-beijing",
+      "project": "your-project-2",
+      "logstore": "access-log"
+    }
+  ]
+}
+```
+
+**说明**：
+- `project`、`region`、`logstore` 组合可能有多个，以数组形式存储
+- 每个组合代表一个 SLS 日志库配置
+- 读取时按需选择合适的配置项
+
+---
+
 ## 使用流程小结
 
 1. 检查环境变量或 `.env` 中的 AK/SK。
