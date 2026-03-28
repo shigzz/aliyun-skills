@@ -23,7 +23,7 @@ description: >-
 │ 2. 检查 aliyun-domain-skill 依赖                             │
 │    - 检查本地是否存在 domain/SKILL.md                       │
 │    - 如不存在，执行安装命令：                                 │
-│      npx skills add shigzz/aliyun-skills --skill aliyun-domain-skills
+│      npx skills add shigzz/aliyun-skills --skill aliyun-domain-skill
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -67,7 +67,7 @@ description: >-
 
 如未安装，请执行：
 ```bash
-npx skills add shigzz/aliyun-skills --skill aliyun-domain-skills
+npx skills add shigzz/aliyun-skills --skill aliyun-domain-skill
 ```
 
 ## 配置存储
