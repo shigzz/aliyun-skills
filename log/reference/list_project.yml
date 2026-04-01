@@ -1,0 +1,210 @@
+ListProject: {
+summary: "列出符合条件的Project信息。",
+path: "/",
+methods: [
+"get"
+],
+schemes: [
+"http",
+"https"
+],
+security: [
+{
+AK: [ ]
+}
+],
+consumes: [
+"application/json"
+],
+produces: [
+"application/json"
+],
+operationType: "read",
+deprecated: false,
+systemTags: {
+operationType: "get",
+riskType: "none",
+chargeType: "free",
+abilityTreeCode: "8912",
+abilityTreeNodes: [
+"FEATUREslsMYXSJS"
+]
+},
+parameters: [
+{
+name: "projectName",
+in: "query",
+schema: {
+description: "Project的名称，支持模糊查询。",
+type: "string",
+required: false,
+example: "ali-test-project"
+}
+},
+{
+name: "offset",
+in: "query",
+schema: {
+description: "查询开始行，默认值为0。",
+type: "integer",
+format: "int32",
+required: false,
+example: "0",
+default: "0"
+}
+},
+{
+name: "size",
+in: "query",
+schema: {
+title: "默认值为 500。",
+description: "分页查询时，设置的每页行数。默认值为100，最多返回500个Project信息。",
+type: "integer",
+format: "int32",
+required: false,
+example: "10",
+default: "500"
+}
+},
+{
+name: "resourceGroupId",
+in: "query",
+schema: {
+description: "资源组ID。",
+type: "string",
+required: false,
+example: "rg-aekzf******sxby"
+}
+},
+{
+name: "fetchQuota",
+in: "query",
+schema: {
+description: "是否获取Project 配额信息",
+type: "boolean",
+required: false,
+enumValueTitles: {
+true: "true",
+false: "false"
+},
+example: "false"
+}
+}
+],
+responses: {
+200: {
+headers: {
+Server: {
+schema: {
+type: "string",
+example: "nginx"
+}
+},
+Content-Length: {
+schema: {
+type: "string",
+example: "0"
+}
+},
+Connection: {
+schema: {
+type: "string",
+example: "close"
+}
+},
+Access-Control-Allow-Origin: {
+schema: {
+type: "string",
+example: "*"
+}
+},
+Date: {
+schema: {
+type: "string",
+example: "Sun, 27 May 2018 08:25:04 GMT"
+}
+},
+x-log-requestid: {
+schema: {
+type: "string",
+example: "5B0A6B60BB6EE39764D458B5"
+}
+}
+},
+schema: {
+description: "Project列表。",
+type: "object",
+properties: {
+count: {
+description: "当前页返回的Project个数。",
+type: "integer",
+format: "int64",
+example: "2"
+},
+total: {
+description: "符合查询条件的Project总数。",
+type: "integer",
+format: "int64",
+example: "11"
+},
+projects: {
+description: "符合查询条件Project列表。",
+type: "array",
+items: {
+description: "符合查询条件Project。",
+example: "不涉及",
+$ref: "#/components/schemas/project"
+},
+example: "不涉及"
+}
+}
+}
+}
+},
+staticInfo: {
+returnType: "synchronous"
+},
+responseDemo: "[{"errorExample":"","example":"{\n  \"count\": 2,\n  \"total\": 11,\n  \"projects\": [\n    {\n      \"createTime\": \"2021-07-07 14:08:09\",\n      \"lastModifyTime\": \"2022-04-18 13:30:19\",\n      \"description\": \"Description of my-project\",\n      \"owner\": \"\\\"\\\"\",\n      \"projectName\": \"ali-test-project\",\n      \"region\": \"cn-hangzhou\",\n      \"status\": \"Normal\",\n      \"resourceGroupId\": \"rg-acf******sq\",\n      \"dataRedundancyType\": \"LRS\",\n      \"quota\": {\n        \"key\": \"\"\n      },\n      \"recycleBinEnabled\": false,\n      \"location\": \"\"\n    }\n  ]\n}","type":"json"}]",
+title: "列出Project信息",
+description: "### 接口说明
+Host由Project名称和日志服务Endpoint构成，您需要在Host中指定Project。",
+requestParamsDescription: "请求示例：
+
+GET /?projectName=ali-test-project&offset=0&size=10 HTTP/1.1
+Host:ali-test-project.cn-hangzhou.log.aliyuncs.com
+Content-Type:application/json",
+extraInfo: "| HttpStatusCode  | ErrorCode  | ErrorMessage  | 错误码描述  |
+| :------------ | :------------ | :------------ | :------------ |
+| 404  | ParameterInvalid | offset : offset pair is invalid  | offset参数取值不合法。  |
+|  500 |  InternalServerError |  Specified Server Error Message. | 内部服务调用错误。 |
+
+更多信息，请参见[通用错误码](~~29013~~)。
+",
+changeSet: [ ],
+flowControl: {
+flowControlList: [ ]
+},
+ramActions: [
+{
+operationType: "get",
+ramAction: {
+action: "log:ListProject",
+authLevel: "resource",
+actionConditions: [
+{
+conditionKey: "log:TLSVersion",
+validationType: "always"
+}
+],
+resources: [
+{
+validationType: "always",
+product: "SLS",
+resourceType: "Project",
+arn: "acs:log:{#regionId}:{#accountId}:project/*"
+}
+]
+}
+}
+]
+}

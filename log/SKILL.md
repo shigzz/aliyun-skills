@@ -1,8 +1,8 @@
 ---
 name: aliyun-sls-skills
 description: >-
-  通过 Python（alibabacloud_sls20201230）调用阿里云 SLS：ListLogStores（列出日志库）、GetLogsV2（查询日志）。
-  适用于「列出 LogStore」「查询 SLS 日志」「搜索与分析日志」等场景。
+  通过 Python（alibabacloud_sls20201230）调用阿里云 SLS：ListProject（列出 Project）、ListLogStores（列出日志库）、GetLogsV2（查询日志）。
+  适用于「列出 Project」「列出 LogStore」「查询 SLS 日志」「搜索与分析日志」等场景。
   API 契约见 reference/*.yml；可运行示例见 scripts/；依赖见 scripts/requirements.txt。
 ---
 
@@ -15,10 +15,12 @@ aliyun-sls-skills/
 ├── SKILL.md
 ├── .env.example
 ├── reference/                    # API 定义（YML），含入参与返回值
+│   ├── list_project.yml
 │   ├── list_logstores.yml
 │   └── get_log_v2.yml
 └── scripts/
     ├── sls_util.py               # 凭证与 Client 构造（供脚本复用）
+    ├── list_project.py
     ├── list_logstores.py
     ├── get_logs_v2.py
     └── requirements.txt
@@ -32,11 +34,13 @@ aliyun-sls-skills/
 
 | 能力 | API | 用途 | 使用场景 |
 |------|-----|------|----------|
+| **列出 Project** | ListProject | 列出账号下 SLS Project | 确认 project 名称、分页浏览 |
 | **列出日志库** | ListLogStores | 列出 Project 下 LogStore | 确认 logstore 名称、分页浏览 |
 | **查询日志** | GetLogsV2 | 按时间范围与查询语句拉取日志 | 检索错误日志、SQL 分析、scan 模式 |
 
 **说明**：
 
+- 若用户不确定 `project` 名称，可先 **ListProject** 查看账号下所有项目。
 - 若用户不确定 `logstore` 名称，可先 **ListLogStores** 再 **GetLogsV2**。
 - **GetLogsV2** 时间区间为**左闭右开** `[from, to)`，且须满足 `from < to`。
 - Python SDK 中请求参数字段名以 `alibabacloud_sls20201230.models` 为准（例如 `GetLogsV2Request` 使用 `from_`、`to`，而非 `from_time` / `to_time`）。
@@ -116,6 +120,61 @@ config = open_api_models.Config(credential=credential)
 config.endpoint = f"{region}.log.aliyuncs.com"
 client = Sls20201230Client(config)
 ```
+
+---
+
+# ListProject
+
+列出当前账号下符合条件的 **Project** 信息。完整字段见 [reference/list_project.yml](reference/list_project.yml)。
+
+## 常用参数（摘要）
+
+| 概念 | SDK 字段 | 说明 |
+|------|----------|------|
+| projectName | `project_name` | Project 名称，支持模糊匹配 |
+| offset | `offset` | 查询开始行，默认 0 |
+| size | `size` | 每页行数，默认 500，最大 500 |
+| resourceGroupId | `resource_group_id` | 资源组 ID |
+| fetchQuota | `fetch_quota` | 是否获取 Project 配额信息 |
+
+## 核心流程
+
+1. `create_client()` 创建 SLS Client（使用凭据链或显式 AK/SK）
+2. 构建 `ListProjectRequest`
+3. `client.list_project_with_options(request, headers, runtime)`
+4. 使用 `resp.body.to_map()` 得到字典
+
+示例脚本：[scripts/list_project.py](scripts/list_project.py)
+
+### 命令行示例
+
+```bash
+cd aliyun-sls-skills
+python scripts/list_project.py
+```
+
+### 代码示例
+
+```python
+from alibabacloud_sls20201230.client import Client as Sls20201230Client
+from alibabacloud_sls20201230 import models as sls_models
+from alibabacloud_credentials.client import Client as CredentialClient
+from alibabacloud_tea_openapi import models as open_api_models
+from alibabacloud_tea_util import models as util_models
+import json
+
+credential = CredentialClient()
+config = open_api_models.Config(credential=credential)
+config.endpoint = "cn-hangzhou.log.aliyuncs.com"
+client = Sls20201230Client(config)
+
+request = sls_models.ListProjectRequest(project_name="test", size=10)
+runtime = util_models.RuntimeOptions()
+resp = client.list_project_with_options(request, {}, runtime)
+print(json.dumps(resp.body.to_map(), default=str, indent=2, ensure_ascii=False))
+```
+
+**响应**（body，常见字段）：`total`、`count`、`projects` 等，以实际返回为准。
 
 ---
 
@@ -255,43 +314,7 @@ except Exception as error:
 | 401/403 | AK/SK 或 RAM 权限不足 |
 | ProjectNotExist | Project 名或 region 错误 |
 | LogStoreNotExist | 先用 ListLogStores 核对名称 |
-| ParameterInvalid | 时间区间、query 语法等 |
-
----
-
-## 配置文件说明
-
-SLS 相关配置（`region`、`project`、`logstore` 等）优先从 `.aliyun-config.json` 文件中读取。
-
-### 配置读取逻辑
-
-1. **读取配置**：首先尝试从 `.aliyun-config.json` 中读取 SLS 配置
-2. **询问用户**：如果配置不存在，询问用户输入相关参数
-3. **持久化配置**：如果用户确认，将配置写入 `.aliyun-config.json` 文件
-
-### 配置格式示例
-
-```json
-{
-  "sls": [
-    {
-      "region": "cn-hangzhou",
-      "project": "your-project-1",
-      "logstore": "app-log"
-    },
-    {
-      "region": "cn-beijing",
-      "project": "your-project-2",
-      "logstore": "access-log"
-    }
-  ]
-}
-```
-
-**说明**：
-- `project`、`region`、`logstore` 组合可能有多个，以数组形式存储
-- 每个组合代表一个 SLS 日志库配置
-- 读取时按需选择合适的配置项
+| ParameterInvalid | 时间区间、query 语法、offset 等参数不合法 |
 
 ---
 
@@ -299,8 +322,9 @@ SLS 相关配置（`region`、`project`、`logstore` 等）优先从 `.aliyun-co
 
 1. 检查环境变量或 `.env` 中的 AK/SK。
 2. 安装 `scripts/requirements.txt`。
-3. 确认 **region**、**project**；不确定 logstore 时先 **ListLogStores**。
-4. **GetLogsV2** 传入合法时间区间与 `query`，解析 `body` 中 `meta` / `data`。
+3. 若不确定 **project** 名称，先 **ListProject** 查看账号下项目。
+4. 确认 **region**、**project**；不确定 logstore 时先 **ListLogStores**。
+5. **GetLogsV2** 传入合法时间区间与 `query`，解析 `body` 中 `meta` / `data`。
 
 ## 注意事项
 
