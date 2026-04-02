@@ -47,6 +47,115 @@ aliyun-sls-skills/
 
 ---
 
+# 项目配置文件（`.aliyun-config.json`）
+
+将 SLS 相关的上下文信息保存到**当前工作目录**下的 `.aliyun-config.json`，便于后续操作复用已确认的 region、project、logstore 等配置，避免重复询问。
+
+## 建议字段
+
+```json
+{
+  "version": 1,
+  "sls": {
+    "region": "cn-hangzhou",
+    "project": "your-project",
+    "logstore": "your-logstore",
+    "last_query_at": "2026-04-01T12:00:00Z"
+  },
+  "notes": "可选备注"
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| `version` | 配置文件版本号 |
+| `sls.region` | SLS 所在地域（如 `cn-hangzhou`） |
+| `sls.project` | Project 名称 |
+| `sls.logstore` | 默认 LogStore 名称（可选） |
+| `sls.last_query_at` | 上次查询时间（ISO 8601 格式） |
+
+## 读取规则
+
+执行 SLS 操作前，**先检查当前工作目录是否存在 `.aliyun-config.json`**：
+
+```python
+import json
+import os
+
+config_path = os.path.join(os.getcwd(), ".aliyun-config.json")
+sls_config = {}
+
+if os.path.exists(config_path):
+    with open(config_path, "r", encoding="utf-8") as f:
+        config = json.load(f)
+        sls_config = config.get("sls", {})
+
+region = sls_config.get("region")
+project = sls_config.get("project")
+logstore = sls_config.get("logstore")
+```
+
+**配置复用逻辑**：
+
+1. 若 `.aliyun-config.json` 中已存在完整的 `sls.region`、`sls.project`（以及按需的 `sls.logstore`），且与用户本次意图一致，可 **直接复用** 而无需再次询问。
+2. 若用户明确要求变更 region、project 或 logstore，须 **重新确认** 并更新配置。
+3. 若配置文件不存在或字段缺失，需先通过 **ListProject** / **ListLogStores** 等 API 查询后，**由用户选择或确认** 再写入。
+
+## 写入规则
+
+在以下时机更新 `.aliyun-config.json`：
+
+1. **用户首次确认 region、project、logstore 后**：写入完整配置。
+2. **每次成功执行查询后**：更新 `sls.last_query_at`。
+3. **用户变更目标资源时**：覆盖对应字段。
+
+```python
+import json
+import os
+from datetime import datetime, timezone
+
+config_path = os.path.join(os.getcwd(), ".aliyun-config.json")
+
+# 读取现有配置（若存在）
+config = {}
+if os.path.exists(config_path):
+    with open(config_path, "r", encoding="utf-8") as f:
+        config = json.load(f)
+
+# 更新 sls 部分
+config["version"] = config.get("version", 1)
+config["sls"] = {
+    "region": "cn-hangzhou",
+    "project": "your-project",
+    "logstore": "your-logstore",
+    "last_query_at": datetime.now(timezone.utc).isoformat()
+}
+
+# 写入
+with open(config_path, "w", encoding="utf-8") as f:
+    json.dump(config, f, indent=2, ensure_ascii=False)
+```
+
+## 与其他 skill 共享
+
+`.aliyun-config.json` 可包含多个阿里云产品的配置（如 `oss`、`cdn`、`domain` 等）。**本 skill 仅读写 `sls` 字段**，不得覆盖或删除其他产品的配置段。
+
+```json
+{
+  "version": 1,
+  "sls": { "region": "cn-hangzhou", "project": "..." },
+  "oss": { "bucket": "...", "region": "..." },
+  "cdn": { "domain": "..." }
+}
+```
+
+## 安全提示
+
+- **勿在配置文件中存储 AK/SK 等敏感凭证**；凭证应通过环境变量或 `.env` 管理。
+- 是否将 `.aliyun-config.json` 提交到版本库，由团队规范决定（建议加入 `.gitignore`）。
+
+---
+
 # 前置检查（必须首先执行）
 
 调用 SLS 前须确认访问凭证已配置。
@@ -322,9 +431,11 @@ except Exception as error:
 
 1. 检查环境变量或 `.env` 中的 AK/SK。
 2. 安装 `scripts/requirements.txt`。
-3. 若不确定 **project** 名称，先 **ListProject** 查看账号下项目。
-4. 确认 **region**、**project**；不确定 logstore 时先 **ListLogStores**。
-5. **GetLogsV2** 传入合法时间区间与 `query`，解析 `body` 中 `meta` / `data`。
+3. 检查 `.aliyun-config.json` 是否已有 SLS 配置（region、project、logstore），若存在且与意图一致可直接复用。
+4. 若不确定 **project** 名称，先 **ListProject** 查看账号下项目。
+5. 确认 **region**、**project**；不确定 logstore 时先 **ListLogStores**。
+6. **GetLogsV2** 传入合法时间区间与 `query`，解析 `body` 中 `meta` / `data`。
+7. 操作成功后更新 `.aliyun-config.json`，保存本次使用的 region、project、logstore 等信息。
 
 ## 注意事项
 
