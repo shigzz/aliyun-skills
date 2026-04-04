@@ -2,6 +2,7 @@
 name: aliyun-deploy
 description: >-
   编排将前端静态构建产物部署到阿里云：假设域名、云解析 DNS、OSS、CDN 等云资源均在同一阿里云账号下。**部署域名、CDN 加速域名、OSS Bucket 必须由用户指定，Agent 不得擅自确定**；可先查询账号内现有资源或创建新资源作为候选，**列出供用户选择后再执行**。若 `.aliyun-config.json` 已记录完整部署上下文，可判定为**增量更新**，仅上传 OSS 并刷新 CDN。遇 OpenAPI **权限不足**须**立即停止**，待用户配置 RAM 后再继续。流程含 CNAME 与证书 TXT 分离、Let’s Encrypt（certbot DNS-01）上传至 CDN、缓存刷新与验收。
+  默认采用「OSS 私有 Bucket + CDN 私有回源」的安全模式：Bucket 不开启公共读，通过 CDN 配置授权访问私有 OSS 源站，兼顾安全性与访问性能。
   依赖 aliyun-domain-skills、aliyun-oss-skills、aliyun-cdn-skills；若当前环境缺失则须先安装。执行 API 前须完成凭证检查。
 ---
 

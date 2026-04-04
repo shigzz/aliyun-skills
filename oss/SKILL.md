@@ -3,6 +3,7 @@ name: aliyun-oss-skill
 description: >-
   通过 Python（alibabacloud_oss_v2）操作阿里云 OSS：列举 Bucket（ListBuckets）、创建 Bucket（PutBucket）、设置 Bucket ACL（PutBucketAcl）、上传 Object（PutObject）。
   适用于「列出 OSS Bucket」「创建存储空间」「修改 Bucket 访问权限」「上传文件到 OSS」等场景。
+  默认不开启公共读，Bucket 保持私有（private），需配合 CDN 或其他授权方式访问。
   API 契约见 reference/*.yml；可运行示例见 scripts/；依赖见 scripts/requirements.txt。
 ---
 

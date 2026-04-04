@@ -3,6 +3,7 @@ name: aliyun-cdn-skill
 description: >-
   通过 Python SDK（alibabacloud_cdn20180510）调用阿里云 CDN OpenAPI：查询加速域名列表与详情、域名配置、CNAME 解析检测、备案查询、域名归属校验（查询校验内容/校验数据、提交校验）、添加域名、批量更新、批量设置域名功能配置、缓存刷新、启用域名、HTTPS 证书设置等。
   适用于「列出 CDN 加速域名」「查详情与配置」「检测 CNAME」「查备案」「域名归属验证」「加域名/批量改配/批量设功能项/刷缓存/启停/配证书」等场景。
+  默认采用阿里云 OSS 私有 Bucket 回源方式（源站类型为 OSS 时开启私有 Bucket 回源），保障源站安全性。
   API 契约见 reference/ 下 YML；可运行示例见 scripts/；初次使用请安装 scripts/requirements.txt 中的依赖。
 ---
 
