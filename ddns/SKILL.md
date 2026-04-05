@@ -76,7 +76,9 @@ npx skills add shigzz/aliyun-skills --skill aliyun-domain-skill
 
 ## 配置存储
 
-DDNS 配置保存在**当前工作目录**的 `.aliyun-config.json`：
+DDNS 配置保存在**当前工作目录**的 `.aliyun-config.json`，支持两种格式：
+
+### 单项目配置（对象格式）
 
 ```json
 {
@@ -91,6 +93,59 @@ DDNS 配置保存在**当前工作目录**的 `.aliyun-config.json`：
   }
 }
 ```
+
+### 多项目配置（数组格式）
+
+支持在同一仓库中管理多个 DDNS 配置（如多域名或多主机）：
+
+```json
+[
+  {
+    "project": "nas-home",
+    "version": 1,
+    "ddns": {
+      "domain_name": "example.com",
+      "rr": "nas",
+      "ttl": 60,
+      "record_id": "12345678901234567",
+      "last_ip": "2408:4002:1c2f:8d00::1",
+      "last_update": "2026-03-28T15:30:00+08:00"
+    }
+  },
+  {
+    "project": "router-office",
+    "version": 1,
+    "ddns": {
+      "domain_name": "company.com",
+      "rr": "router",
+      "ttl": 60,
+      "record_id": "98765432109876543",
+      "last_ip": "2408:4002:1c2f:8e00::1",
+      "last_update": "2026-03-28T10:00:00+08:00"
+    }
+  }
+]
+```
+
+**字段说明**：
+
+| 字段 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| `project` | string | **多项目时必需** | 项目标识名，用于区分不同配置 |
+| `version` | int | 是 | 配置格式版本，当前为 1 |
+| `ddns.domain_name` | string | 是 | 根域名，用于 DNS 解析 |
+| `ddns.rr` | string | 是 | 主机记录，如 `ddns` 或 `@` |
+| `ddns.ttl` | int | 否 | DNS 记录 TTL，默认 60 秒 |
+| `ddns.record_id` | string | 否 | 阿里云 DNS 记录 ID |
+| `ddns.last_ip` | string | 否 | 上次更新的 IP 地址 |
+| `ddns.last_update` | string | 否 | ISO 8601 格式最后更新时间 |
+
+### 配置复用
+
+- **对象格式**：若配置存在且字段完整，本次可直接复用，无需再次询问
+- **数组格式**：提示用户选择要使用的项目（按 `project` 字段区分），选定后仅更新该项目配置
+
+若用户要求更换域名或主机记录，或新增项目配置，则重新交互确认。
 
 ## 前置检查
 

@@ -49,30 +49,86 @@ aliyun-sls-skills/
 
 # 项目配置文件（`.aliyun-config.json`）
 
-将 SLS 相关的上下文信息保存到**当前工作目录**下的 `.aliyun-config.json`，便于后续操作复用已确认的 region、project、logstore 等配置，避免重复询问。
+将 SLS 相关的上下文信息保存到**当前工作目录**下的 `.aliyun-config.json`，便于后续操作复用已确认的 region、project、logstore 等配置，避免重复询问。支持两种格式：
 
-## 建议字段
+## 单项目配置（对象格式）
 
 ```json
 {
   "version": 1,
-  "sls": {
-    "region": "cn-hangzhou",
-    "project": "your-project",
-    "logstore": "your-logstore",
-    "last_query_at": "2026-04-01T12:00:00Z"
-  },
-  "notes": "可选备注"
+  "sls": [
+    {
+      "region": "cn-hangzhou",
+      "project": "prod-sls-project",
+      "logstores": ["app-logs", "nginx-logs", "access-logs"],
+      "default_logstore": "app-logs",
+      "last_query_at": "2026-04-01T12:00:00Z"
+    },
+    {
+      "region": "cn-beijing",
+      "project": "backup-sls-project",
+      "logstores": ["archive-logs"],
+      "default_logstore": "archive-logs",
+      "last_query_at": "2026-03-28T10:00:00Z"
+    }
+  ]
 }
 ```
 
-| 字段 | 说明 |
-|------|------|
-| `version` | 配置文件版本号 |
-| `sls.region` | SLS 所在地域（如 `cn-hangzhou`） |
-| `sls.project` | Project 名称 |
-| `sls.logstore` | 默认 LogStore 名称（可选） |
-| `sls.last_query_at` | 上次查询时间（ISO 8601 格式） |
+## 多项目配置（数组格式）
+
+支持在同一仓库中管理多个应用/环境的 SLS 配置：
+
+```json
+[
+  {
+    "project": "web-app",
+    "version": 1,
+    "sls": [
+      {
+        "region": "cn-hangzhou",
+        "project": "web-prod",
+        "logstores": ["frontend", "backend", "nginx"],
+        "default_logstore": "backend",
+        "last_query_at": "2026-04-01T12:00:00Z"
+      },
+      {
+        "region": "cn-shanghai",
+        "project": "web-dr",
+        "logstores": ["frontend", "backend"],
+        "default_logstore": "backend",
+        "last_query_at": "2026-04-01T11:00:00Z"
+      }
+    ]
+  },
+  {
+    "project": "data-platform",
+    "version": 1,
+    "sls": [
+      {
+        "region": "cn-beijing",
+        "project": "etl-logs",
+        "logstores": ["spark", "flink", "kafka"],
+        "default_logstore": "spark",
+        "last_query_at": "2026-04-01T10:00:00Z"
+      }
+    ]
+  }
+]
+```
+
+**字段说明**：
+
+| 字段 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| `project` | string | **多项目时必需** | 配置项目标识名（如应用名、环境名），用于区分不同配置 |
+| `version` | int | 是 | 配置格式版本，当前为 1 |
+| `sls` | array | 是 | SLS 配置列表，每个元素对应一个 SLS Project（可跨地域） |
+| `sls[].region` | string | 是 | 该 SLS Project 所在地域（如 `cn-hangzhou`） |
+| `sls[].project` | string | 是 | SLS Project 名称 |
+| `sls[].logstores` | array | 是 | 该 Project 下的 LogStore 名称列表 |
+| `sls[].default_logstore` | string | 否 | 默认使用的 LogStore 名称 |
+| `sls[].last_query_at` | string | 否 | ISO 8601 格式上次查询时间 |
 
 ## 读取规则
 
@@ -83,31 +139,44 @@ import json
 import os
 
 config_path = os.path.join(os.getcwd(), ".aliyun-config.json")
-sls_config = {}
+sls_entries = []
 
 if os.path.exists(config_path):
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
-        sls_config = config.get("sls", {})
+        # 数组格式（多项目）：提示用户选择项目
+        if isinstance(config, list):
+            # 展示项目列表供用户选择
+            projects = [item.get("project", f"项目{i}") for i, item in enumerate(config)]
+            # 用户选择后获取该项目的 sls 列表
+            selected = config[selected_index]
+            sls_entries = selected.get("sls", [])
+        # 对象格式（单项目）：直接使用 sls 列表
+        else:
+            sls_entries = config.get("sls", [])
 
-region = sls_config.get("region")
-project = sls_config.get("project")
-logstore = sls_config.get("logstore")
+# sls_entries 是列表，包含多个 {region, project, logstores, ...}
+# 若存在多个，提示用户选择具体的 project+logstore
 ```
 
 **配置复用逻辑**：
 
-1. 若 `.aliyun-config.json` 中已存在完整的 `sls.region`、`sls.project`（以及按需的 `sls.logstore`），且与用户本次意图一致，可 **直接复用** 而无需再次询问。
-2. 若用户明确要求变更 region、project 或 logstore，须 **重新确认** 并更新配置。
-3. 若配置文件不存在或字段缺失，需先通过 **ListProject** / **ListLogStores** 等 API 查询后，**由用户选择或确认** 再写入。
+1. **单条配置**：若 `sls` 列表仅含一条配置，且字段完整，可直接复用。
+2. **多条配置**：若 `sls` 列表包含多条（多 Project 或多地域），提示用户选择具体的 `region` + `project` + `logstore`。
+3. **多项目格式**：先选择外层 `project` 字段，再在其 `sls` 列表中选择具体配置。
+4. 若用户明确要求变更 region、project 或 logstore，须 **重新确认** 并更新配置。
+5. 若配置文件不存在或字段缺失，需先通过 **ListProject** / **ListLogStores** 等 API 查询后，**由用户选择或确认** 再写入。
 
 ## 写入规则
 
 在以下时机更新 `.aliyun-config.json`：
 
-1. **用户首次确认 region、project、logstore 后**：写入完整配置。
-2. **每次成功执行查询后**：更新 `sls.last_query_at`。
-3. **用户变更目标资源时**：覆盖对应字段。
+1. **用户首次确认 region、project、logstore 后**：写入 sls 列表。
+2. **每次成功执行查询后**：更新对应条目的 `last_query_at`。
+3. **用户变更目标资源时**：更新或追加对应条目。
+4. **新增项目配置时**：数组格式下追加新项目。
+
+### 单项目配置写入示例
 
 ```python
 import json
@@ -122,14 +191,73 @@ if os.path.exists(config_path):
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
 
-# 更新 sls 部分
+# 更新 sls 列表
 config["version"] = config.get("version", 1)
-config["sls"] = {
-    "region": "cn-hangzhou",
-    "project": "your-project",
-    "logstore": "your-logstore",
-    "last_query_at": datetime.now(timezone.utc).isoformat()
+config["sls"] = [
+    {
+        "region": "cn-hangzhou",
+        "project": "prod-sls",
+        "logstores": ["app", "nginx"],
+        "default_logstore": "app",
+        "last_query_at": datetime.now(timezone.utc).isoformat()
+    },
+    {
+        "region": "cn-beijing",
+        "project": "backup-sls",
+        "logstores": ["archive"],
+        "default_logstore": "archive",
+        "last_query_at": "2026-03-28T10:00:00Z"
+    }
+]
+
+# 写入
+with open(config_path, "w", encoding="utf-8") as f:
+    json.dump(config, f, indent=2, ensure_ascii=False)
+```
+
+### 多项目配置写入示例
+
+```python
+import json
+import os
+from datetime import datetime, timezone
+
+config_path = os.path.join(os.getcwd(), ".aliyun-config.json")
+
+# 读取现有配置（若存在）
+config = []
+if os.path.exists(config_path):
+    with open(config_path, "r", encoding="utf-8") as f:
+        content = f.read().strip()
+        if content:
+            loaded = json.loads(content)
+            config = loaded if isinstance(loaded, list) else [loaded]
+
+# 查找或创建项目配置
+project_name = "web-app"  # 用户指定的项目名
+existing = next((item for item in config if item.get("project") == project_name), None)
+
+new_entry = {
+    "project": project_name,
+    "version": 1,
+    "sls": [
+        {
+            "region": "cn-hangzhou",
+            "project": "web-prod",
+            "logstores": ["frontend", "backend"],
+            "default_logstore": "backend",
+            "last_query_at": datetime.now(timezone.utc).isoformat()
+        }
+    ]
 }
+
+if existing:
+    # 更新现有项目的 sls 列表
+    existing["sls"] = new_entry["sls"]
+    existing["version"] = new_entry["version"]
+else:
+    # 追加新项目配置
+    config.append(new_entry)
 
 # 写入
 with open(config_path, "w", encoding="utf-8") as f:
@@ -431,11 +559,12 @@ except Exception as error:
 
 1. 检查环境变量或 `.env` 中的 AK/SK。
 2. 安装 `scripts/requirements.txt`。
-3. 检查 `.aliyun-config.json` 是否已有 SLS 配置（region、project、logstore），若存在且与意图一致可直接复用。
-4. 若不确定 **project** 名称，先 **ListProject** 查看账号下项目。
-5. 确认 **region**、**project**；不确定 logstore 时先 **ListLogStores**。
-6. **GetLogsV2** 传入合法时间区间与 `query`，解析 `body` 中 `meta` / `data`。
-7. 操作成功后更新 `.aliyun-config.json`，保存本次使用的 region、project、logstore 等信息。
+3. 检查 `.aliyun-config.json` 是否已有 SLS 配置（`sls` 列表），若存在且与意图一致可直接复用。
+4. 若配置包含多条 sls 条目或多项目配置，提示用户选择具体的 region + project + logstore。
+5. 若不确定 **project** 名称，先 **ListProject** 查看账号下项目。
+6. 确认 **region**、**project**；不确定 logstore 时先 **ListLogStores**。
+7. **GetLogsV2** 传入合法时间区间与 `query`，解析 `body` 中 `meta` / `data`。
+8. 操作成功后更新 `.aliyun-config.json` 中对应条目的 `last_query_at`。
 
 ## 注意事项
 
