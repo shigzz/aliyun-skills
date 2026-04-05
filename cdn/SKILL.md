@@ -3,7 +3,6 @@ name: aliyun-cdn-skill
 description: >-
   通过 Python SDK（alibabacloud_cdn20180510）调用阿里云 CDN OpenAPI：查询加速域名列表与详情、域名配置、CNAME 解析检测、备案查询、域名归属校验（查询校验内容/校验数据、提交校验）、添加域名、批量更新、批量设置域名功能配置、缓存刷新、启用域名、HTTPS 证书设置等。
   适用于「列出 CDN 加速域名」「查详情与配置」「检测 CNAME」「查备案」「域名归属验证」「加域名/批量改配/批量设功能项/刷缓存/启停/配证书」等场景。
-  默认采用阿里云 OSS 私有 Bucket 回源方式（源站类型为 OSS 时开启私有 Bucket 回源），保障源站安全性。
   API 契约见 reference/ 下 YML；可运行示例见 scripts/；初次使用请安装 scripts/requirements.txt 中的依赖。
 ---
 
@@ -224,6 +223,36 @@ client = Cdn20180510Client(config)
 ## BatchSetCdnDomainConfig
 
 对多个加速域名**批量设置功能配置**（`Functions` 等）。**写接口**；单次域名个数、与功能项数量的乘积上限等以 YML 为准。详见 [reference/batch_set_cdndomain_config.yml](reference/batch_set_cdndomain_config.yml)，示例：[scripts/batch_set_cdndomain_config.py](scripts/batch_set_cdndomain_config.py)。
+
+### 私有 OSS Bucket 回源配置
+
+当源站为阿里云 OSS 私有 Bucket 时，需要开启私有回源功能，CDN 才能正常回源拉取资源：
+
+```python
+import json
+from alibabacloud_cdn20180510 import models as cdn_20180510_models
+
+# 配置私有 OSS 回源
+functions = [{
+    "functionName": "l2_oss_key",
+    "functionArgs": [
+        {
+            "argName": "private_oss_auth",
+            "argValue": "on"
+        }
+    ]
+}]
+
+request = cdn_20180510_models.BatchSetCdnDomainConfigRequest(
+    domain_names="www.example.com",
+    functions=json.dumps(functions)
+)
+```
+
+**关键参数说明**：
+- `functionName`: `l2_oss_key` - OSS 私有 Bucket 回源功能
+- `argName`: `private_oss_auth` - 私有 OSS 鉴权开关
+- `argValue`: `on` 开启私有回源，`off` 关闭私有回源
 
 ## RefreshObjectCaches
 
